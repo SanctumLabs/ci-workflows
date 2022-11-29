@@ -1,0 +1,11 @@
+## This pipeline template will run hadolint on all Dockerfiles
+## Learn more: https://github.com/hadolint/hadolint
+## Requires a test stage.
+
+hadolint:
+  image: hadolint/hadolint
+  variables:
+    DOCKERFILES: "./Dockerfile" # A space seperated list of all Dockerfiles to test
+    IGNORED_RULES: "DL3008"     # A space seperated list of rules to ignore. To run all rules, use ""
+  script:
+    - hadolint ${DOCKERFILES} --ignore DL3008
