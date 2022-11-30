@@ -1,0 +1,38 @@
+## This pipeline template allows the build of a docker image and pushing it to Docker Hub
+
+## Required variables:
+## DOCKER_IMAGE_NAME:        The Image name of the image that we're pushing
+
+## Optional variables:
+## DOCKERHUB_REPO:        Repository for Dockerhub to push images to.
+##                        Set at the Group Level
+## DOCKERHUB_USERNAME:    Username for Dockerhub to authenticate with.
+##                        Set at the Group Level
+## DOCKERHUB_PASSWORD:    Password for Dockerhub to authenticate with.
+##                        Set at the Group Level
+## CACHE_TAG: The tag pulled before starting a build as a base to assist with faster builds using layers
+## DOCKER_CACHE_TARGET: Space seperated list of stages in the Dockerfile to build and cache
+## DOCKER_CONTEXT: Path of the docker context
+## DOCKER_EXTRA_BUILD_ARGS: Some extra arguments that needs to be passed to docker build,
+##                          eg --build-arg some ARG
+## DOCKERFILE: Path to the Dockerfile we want to use
+## DOCKER_IMAGE_TAG: Space seperated list of tags to push after building
+
+.docker-hub-build:
+  image: docker:latest
+  variables:
+    CACHE_TAG: ${CI_DEFAULT_BRANCH}
+    DOCKER_CACHE_TARGET: ""
+    DOCKER_CONTEXT: "."
+    DOCKER_EXTRA_BUILD_ARGS: ""
+    DOCKER_TLS_CERTDIR: "" # Used to turn TLS off, doesn't work with out runners
+    DOCKERFILE: Dockerfile
+    DOCKERHUB_REPO: ${DOCKERHUB_REPO}
+    DOCKERHUB_USERNAME: ${DOCKERHUB_USERNAME}
+    DOCKERHUB_PASSWORD: ${DOCKERHUB_PASSWORD}
+    DOCKER_IMAGE_NAME: ""
+    DOCKER_IMAGE_TAG: ${CI_COMMIT_SHA} ${CI_COMMIT_REF_NAME}    
+  services:
+    - docker:dind
+  script:
+  - /scripts/docker-build.sh
