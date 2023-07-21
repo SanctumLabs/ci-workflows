@@ -1,0 +1,66 @@
+## This pipeline template sends notifications to Slack when pipeline succeeds
+## If you have manual deploys, you will need to add a section to your ci pipeline
+## to only post Slack messages when your manual deploy is done. If you fail to do
+## this, it will post as soon as the last automatic job is run.
+## In your gitlab-ci.yml add the following:
+## slack-success:
+##   needs:
+##    - job: <Name of manual deploy job>
+##      optional: true
+
+## Required Variables (should be set at group level)
+## SLACK_WEBHOOK_URL: The webhook URL to post to slack
+## SANCTUM_LABS_PIPELINES_CHANNEL: The default channel that all messages are posted to
+
+## Optional Variables
+## SLACK_DEPLOY_CHANNEL: An additional deploy channel. Possibly team/project specific
+
+.slack-notifier:
+  stage: .post
+  dependencies: []
+  image:
+    name: cloudposse/slack-notifier
+    entrypoint: [""]
+  variables:
+    GIT_STRATEGY: "none"
+    SLACK_ICON_EMOJI: ":gitlab:"
+    SLACK_USER_NAME: "GitLab"
+    SLACK_PRETEXT: "${CI_COMMIT_MESSAGE}"
+    SLACK_AUTHOR_NAME: "Gitlab CI Pipeline"
+    SLACK_TITLE_LINK: "${CI_PIPELINE_URL}"
+    SLACK_FIELD1_TITLE: "Branch"
+    SLACK_FIELD1_VALUE: "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    SLACK_FIELD2_TITLE: "Initiated by"
+    SLACK_FIELD2_VALUE: "${GITLAB_USER_NAME}"
+    SLACK_FIELD3_TITLE: "Git Reference"
+    SLACK_FIELD3_VALUE: "${CI_COMMIT_SHORT_SHA}"
+  script:
+    - |
+      # Post message to global ${SANCTUM_LABS_PIPELINES_CHANNEL}
+      SLACK_CHANNEL=${SANCTUM_LABS_PIPELINES_CHANNEL} slack-notifier
+    - |
+      # Check if ${SLACK_DEPLOY_CHANNEL} is set, and if it is, post there as well
+      if [[ -n "${SLACK_DEPLOY_CHANNEL}" ]]; then
+        SLACK_CHANNEL=${SLACK_DEPLOY_CHANNEL} slack-notifier
+      fi
+  tags:
+    - tiny
+  only:
+    - main
+
+slack-success:
+  extends: .slack-notifier
+  variables:
+    SLACK_FALLBACK: "Successful job - ${CI_PROJECT_NAME}"
+    SLACK_COLOR: "good"
+    SLACK_TITLE: "Successful Job - ${CI_PROJECT_NAME}"
+    SLACK_TEXT: "The latest changes have run successfully"
+
+slack-failure:
+  extends: .slack-notifier
+  variables:
+    SLACK_FALLBACK: "Job failure - ${CI_PROJECT_NAME}"
+    SLACK_COLOR: "danger"
+    SLACK_TITLE: "Job Failure  - ${CI_PROJECT_NAME}"
+    SLACK_TEXT: "Failure running job"
+  when: on_failure
