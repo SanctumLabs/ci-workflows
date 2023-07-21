@@ -43,10 +43,6 @@
       if [[ -n "${SLACK_DEPLOY_CHANNEL}" ]]; then
         SLACK_CHANNEL=${SLACK_DEPLOY_CHANNEL} slack-notifier
       fi
-  tags:
-    - tiny
-  only:
-    - main
 
 slack-success:
   extends: .slack-notifier
