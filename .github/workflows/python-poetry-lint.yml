@@ -1,0 +1,50 @@
+# Re-useable Python Lint workflow using Poetry as the package manager
+name: Reusable Lint Workflow
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: Command to run for linting
+        required: true
+        type: string
+      python-version:
+        description: Python Version to use
+        default: '3.10'
+        required: false
+        type: string
+
+jobs:
+  command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+
+      - name: Restore Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.venv
+          key: ${{ runner.os }}-pyproject-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          poetry export --without-hashes --format=requirements.txt > requirements.txt
+          pip install -r requirements.txt --no-cache-dir
+          pip install black
+          pip install pylint
+
+      - name: Run lint
+        run: ${{ inputs.command }}

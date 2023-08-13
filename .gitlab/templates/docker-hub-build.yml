@@ -35,4 +35,4 @@
   services:
     - docker:dind
   script:
-  - /scripts/docker-build.sh
+  - ../scripts/docker-build.sh
