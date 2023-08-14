@@ -1,11 +1,16 @@
 # Used when handling releases
+# Uses https://github.com/softprops/action-gh-release
 name: Re-useable Release Workflow
 
 on:
   workflow_call:
     inputs:
-      command:
-        description: Command to run for running builds
+      name:
+        description: Release Name
+        required: false
+        type: string
+      tag_name:
+        description: Github Tag Name
         required: true
         type: string
 
@@ -16,15 +21,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 'lts/*'
 
       - name: Release
-        run: npx semantic-release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: ${{ inputs.name }}
+          tag_name: ${{ inputs.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
