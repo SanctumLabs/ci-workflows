@@ -46,7 +46,7 @@ jobs:
         with:
           path: |
             ~/.venv
-          key: ${{ runner.os }}-pyproject-${{ hashFiles('pyproject.toml') }}
+          key: ${{ runner.os }}-${{ github.workflow.name }}-pyproject-${{ hashFiles('pyproject.toml') }}
 
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'

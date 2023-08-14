@@ -7,11 +7,11 @@ on:
         description: Command to run for publishing to PyPI
         required: true
         type: string
-    python-version:
-      description: Python Version to use
-      default: '3.10'
-      required: false
-      type: string
+      python-version:
+        description: Python Version to use
+        default: '3.10'
+        required: false
+        type: string
     secrets:
       pypi_token:
         description: PyPI Token to use for publishing
