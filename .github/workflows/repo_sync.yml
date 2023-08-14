@@ -1,0 +1,32 @@
+# Ref: https://github.com/wangchucheng/git-repo-sync
+# Syncs a repository to another VCS
+name: Re-useable RepoSync
+
+on:
+  workflow_call:
+    secrets:
+      url:
+        description: Target Repository URL to push changes to
+        required: true
+      username:
+        description: Username
+        required: true
+      token:
+        description: Access Token
+        required: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Repo Sync
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to Repository
+        uses: wangchucheng/git-repo-sync@v0.1.0
+        with:
+          target-url: ${{ secrets.url }}
+          target-username: ${{ secrets.username }}
+          target-token: ${{ secrets.token }}
