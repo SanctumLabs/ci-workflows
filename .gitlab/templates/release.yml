@@ -1,0 +1,25 @@
+## This pipeline template creates tags 
+## If you have manual deploys, you can use this in your pipeline to only create tags at a certain section of
+## the release workflow
+## In your gitlab-ci.yml add the following:
+## create-tag:
+##   needs:
+##    - job: <Name of manual deploy job>
+##      optional: true
+
+## Required Variables (should be set at group level)
+## GITLAB_TOKEN: The token to use when creating tags
+
+create-tag:
+  stage: publish
+  image: node:18
+  variables:
+    GITLAB_TOKEN: ${GITLAB_ACCESS_TOKEN}
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git-core ca-certificates
+    - npm install -g semantic-release @semantic-release/gitlab @semantic-release/changelog @semantic-release/git
+  script:
+    - semantic-release
+  only:
+    - main
+  when: manual
