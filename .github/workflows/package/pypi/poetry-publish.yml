@@ -1,0 +1,59 @@
+name: Re-useable Python-Poetry Publish Workflow
+
+on:
+  workflow_call:
+    inputs:
+      command: 
+        description: Command to run for publishing to PyPI
+        required: true
+        type: string
+      python-version:
+        description: Python Version to use
+        default: '3.10'
+        required: false
+        type: string
+    secrets:
+      pypi_token:
+        description: PyPI Token to use for publishing
+        required: true
+
+jobs:
+  command:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'      
+      
+      - name: Restore Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.venv
+          key: ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-pyproject-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-pyproject-
+
+      - name: Install required dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          python -m pip install --upgrade --disable-pip-version-check pip
+          python -m pip install --upgrade build twine
+          poetry export --without-hashes --format=requirements.txt > requirements.txt
+          pip install -r requirements.txt --no-cache-dir
+
+      - name: Publish
+        env:
+          TWINE_PASSWORD: ${{ secrets.pypi_token }}
+        run: ${{ inputs.command }}

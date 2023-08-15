@@ -1,0 +1,95 @@
+name: Re-useable Python Test Workflow
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: Command to run for running tests
+        required: true
+        type: string
+      python-version:
+        description: Python Version to use
+        default: '3.10'
+        required: false
+        type: string
+      upload-coverage:
+        description: Whether to upload coverage reports
+        default: false
+        required: false
+        type: boolean
+
+    secrets:
+      codacy_token:
+        description: 'Codacy Project token for uploading coverage to Codacy'
+        required: false
+
+jobs:
+  command:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+
+      - name: Restore Cache
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.venv
+          key: ${{ runner.os }}-${{ github.workflow.name }}-pyproject-${{ hashFiles('pyproject.toml') }}
+
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          poetry export --without-hashes --format=requirements.txt > requirements.txt
+          pip install -r requirements.txt --no-cache-dir
+          pip install pytest
+          pip install pytest-cov
+
+      - name: Run tests
+        run: ${{ inputs.command }}
+
+      - name: Upload Test coverage reports
+        if: ${{ inputs.upload-coverage }}
+        uses: codecov/codecov-action@v3
+
+      - name: Check for Codacy Token Secret availability
+        if: ${{ inputs.upload-coverage }}
+        id: codacy-secret-check
+        # perform secret check & put boolean result as an output
+        shell: bash
+        run: |
+          if [ "${{ secrets.codacy_token }}" != '' ]; then
+            echo "available=true" >> $GITHUB_OUTPUT;
+          else
+            echo "available=false" >> $GITHUB_OUTPUT;
+          fi
+
+      - name: Check Inadequate Permissions
+        if: ${{ steps.codacy-secret-check.outputs.available != 'true' && inputs.upload-coverage }}
+        # provide feedback for likely problem, note dependabot cannot access
+        # secrets by default. Secondly, this step forces job to exit with a code of 0. This secret may be missing intentionally
+        shell: bash
+        run: |
+          if [ "${{ github.actor }}" == "dependabot[bot]" ]; then
+            echo >&2 "Unable to access secrets as unprivileged dependabot.";
+          else
+            echo >&2 "Inadequate Permissions or missing secret value";
+          fi
+          exit 0
+          
+      - name: Run codacy-coverage-reporter
+        if: ${{ steps.codacy-secret-check.outputs.available == 'true' && inputs.upload-coverage }}
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.codacy_token }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)

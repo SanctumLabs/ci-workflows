@@ -1,0 +1,31 @@
+# Re-useable Python Lint workflow using Poetry as the package manager
+name: Reusable Lint Workflow
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: Command to run for linting
+        required: true
+        type: string
+      python-version:
+        description: Python Version to use
+        default: '3.10'
+        required: false
+        type: string
+
+jobs:
+  command:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup
+        uses: ./.github/actions/setup-python-poetry
+        with:
+          python-version: ${{ inputs.python-version }}
+          poetry-version: latest
+
+      - name: Run lint
+        run: ${{ inputs.command }}
