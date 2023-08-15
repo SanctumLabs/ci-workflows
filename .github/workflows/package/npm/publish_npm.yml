@@ -1,0 +1,78 @@
+name: Re-useable NPM Publish Workflow
+
+on:
+  workflow_call:
+    inputs:
+      directory:
+        type: string
+        required: false
+        description: Root Directory where package will be published
+      version:
+        type: string
+        description: Version of Package
+        required: true
+      scope:
+        type: string
+        description: Scope of package
+        required: true
+      registry:
+        type: string
+        description: Registry URL
+        required: true
+      nodeVersion:
+        type: string
+        required: false
+        description: Node Version
+        default: "16.x"
+    secrets:
+      npmAuthToken:
+        required: true
+        description: NPM Token
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    name: Publish NPM package
+    permissions: write-all
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Setup .npmrc file to publish to GitHub Packages
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.nodeVersion }}
+          registry-url: ${{ inputs.registry }}
+          scope: ${{ inputs.scope }}
+
+      - name: Check for provided directory
+        if: ${{ inputs.directory }}
+        id: directory-check
+        # perform directory check & put boolean result as an output
+        shell: bash
+        run: |
+          if [ "${{ inputs.directory }}" != '' ]; then
+            echo "changeDir=true" >> $GITHUB_OUTPUT;
+          else
+            echo "changeDir=false" >> $GITHUB_OUTPUT;
+          fi
+
+      - name: Publish from ${{ inputs.directory }}
+        env:
+          NPM_TOKEN: ${{ secrets.npmAuthToken }}
+        if: ${{ steps.directory-check.ouputs.changeDir == 'true' }}
+        run: |
+          cd ${{ inputs.directory }}
+          npm ci
+          npm version ${{ inputs.version }}
+          npm publish
+
+      - name: Publish from root directory
+        env:
+          NPM_TOKEN: ${{ secrets.npmAuthToken }}
+        if: ${{ steps.directory-check.ouputs.changeDir != 'true' }}
+        run: |
+          npm ci
+          npm version ${{ inputs.version }}
+          npm publish

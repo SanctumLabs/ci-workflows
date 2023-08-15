@@ -1,0 +1,31 @@
+# This workflow will build a buf project
+# for more information view https://buf.build/docs/ci-cd/github-actions/
+# This is a re-useable workflow as specified here https://docs.github.com/en/actions/using-workflows/reusing-workflows
+# which triggers a buf build and archives the artifact for re-use by other jobs
+name: Buf Build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Buf Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Buf Setup
+        uses: bufbuild/buf-setup-action@v1
+
+      - name: Generate
+        run: buf generate
+      
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: lib
+          path: |
+            lib
+          retention-days: 7
