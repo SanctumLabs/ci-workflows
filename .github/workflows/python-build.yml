@@ -1,5 +1,5 @@
-# Re-useable Python Lint workflow using Poetry as the package manager
-name: Reusable Python Lint Workflow
+# Used to run builds with package manager
+name: Re-useable Python Build Workflow
 
 on:
   workflow_call:
@@ -8,9 +8,9 @@ on:
         description: Python Package manager to use, e.g pip, poetry, pipenv
         required: false
         default: poetry
-        type: string
+        type: string      
       command:
-        description: Command to run for linting
+        description: Command to run for running builds
         required: true
         type: string
       python-version:
@@ -20,8 +20,9 @@ on:
         type: string
 
 jobs:
-  lint:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3

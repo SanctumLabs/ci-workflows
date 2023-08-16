@@ -1,5 +1,4 @@
-# Re-useable Python Lint workflow using Poetry as the package manager
-name: Reusable Python Lint Workflow
+name: Re-useable Python Publish Workflow
 
 on:
   workflow_call:
@@ -8,9 +7,9 @@ on:
         description: Python Package manager to use, e.g pip, poetry, pipenv
         required: false
         default: poetry
-        type: string
-      command:
-        description: Command to run for linting
+        type: string      
+      command: 
+        description: Command to run for publishing to PyPI
         required: true
         type: string
       python-version:
@@ -18,10 +17,15 @@ on:
         default: '3.10'
         required: false
         type: string
+    secrets:
+      pypi_token:
+        description: PyPI Token to use for publishing
+        required: true
 
 jobs:
-  lint:
+  publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -33,5 +37,7 @@ jobs:
           uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}
           with: '{ "python-version": ${{ inputs.python-version }} }'
 
-      - name: Run ${{ inputs.command }}
+      - name: Publish
+        env:
+          TWINE_PASSWORD: ${{ secrets.pypi_token }}
         run: ${{ inputs.command }}
