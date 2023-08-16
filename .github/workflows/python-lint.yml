@@ -31,7 +31,7 @@ jobs:
         uses: jenseng/dynamic-uses@v1
         with:
           uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}@main
-          with: '{ "python-version": ${{ inputs.python-version }} }'
+          with: '{ "python-version": "${{ inputs.python-version }}" }'
 
       - name: Run ${{ inputs.command }}
         run: ${{ inputs.command }}
