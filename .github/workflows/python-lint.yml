@@ -26,10 +26,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Ref: https://github.com/jenseng/dynamic-uses
       - name: Setup 
         uses: jenseng/dynamic-uses@v1
         with:
-          uses: ./.github/actions/setup-python-${{ inputs.packager }}
+          uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}
           with: '{ "python-version": ${{ inputs.python-version }} }'
 
       - name: Run lint
