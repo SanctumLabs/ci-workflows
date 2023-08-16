@@ -17,6 +17,10 @@ on:
         default: '3.10'
         required: false
         type: string
+      version:
+        description: Version of package
+        required: true
+        type: string
     secrets:
       pypi_token:
         description: PyPI Token to use for publishing
@@ -40,4 +44,5 @@ jobs:
       - name: Publish
         env:
           TWINE_PASSWORD: ${{ secrets.pypi_token }}
+          VERSION: ${{ inputs.version }}
         run: ${{ inputs.command }}
