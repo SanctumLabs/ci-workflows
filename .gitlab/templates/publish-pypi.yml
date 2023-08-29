@@ -1,0 +1,13 @@
+## Publish PyPI Python package which defaults to publishing to Gitlab Package registry
+
+.publish-pypi:
+    image: python:3.10.4
+    variables:
+        TWINE_PASSWORD: ${CI_JOB_TOKEN}
+        TWINE_USERNAME: gitlab-ci-token
+        REPOSITORY_URL: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
+        DIRECTORY: ./dist/*
+      before_script:
+        - pip install twine
+    script:
+        - TWINE_PASSWORD=${TWINE_PASSWORD} TWINE_USERNAME=${TWINW_PASSWORD} twine upload --repository-url ${REPOSITORY_URL} --verbose -u '__token__' ${DIRECTORY}
