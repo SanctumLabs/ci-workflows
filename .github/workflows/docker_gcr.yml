@@ -4,6 +4,12 @@ name: Re-useable Github Container Registry
 
 on:
   workflow_call:
+    inputs:
+      tag:
+        description: Tag name of the image
+        type: string
+        required: false
+        default: latest
     secrets:
         token:
             description: Github Token
@@ -31,7 +37,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},value=${{ inputs.tag }}            
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha

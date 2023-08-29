@@ -1,0 +1,18 @@
+## This template allows setting up a project to integrate with SonarCloud to run code analysis
+
+.sonarcloud:
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    DEFAULT_BRANCH: "$CI_COMMIT_REF_NAME"
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    CACHE_KEY: "${CI_JOB_NAME}"
+  cache:
+    key: "${CACHE_KEY}"
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner -Dsonar.qualitygate.wait=true
+  rules:
+    - if: $CI_COMMIT_REF_NAME == '$DEFAULT_BRANCH' || $CI_PIPELINE_SOURCE == 'merge_request_event'
