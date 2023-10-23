@@ -1,0 +1,27 @@
+## This pipeline template allows the dependabot build to run dependency check updates
+
+## Required variables:
+## DOCKER_IMAGE_NAME:        The Image name of the image that we're pushing
+
+## Required variables:
+## PACKAGE_MANAGER:       Package manager to use; either npm, pip, gradle, etc
+## Optional variables:
+## SCHEDULE_NAME: name of the set schedule, defaults to dependabot
+
+.dependabot:
+  image:
+    name: docker.io/andrcuns/dependabot-gitlab:0.11.0
+    entrypoint: [""]
+  variables:
+    GIT_STRATEGY: none
+    PACKAGE_MANAGER: ${PACKAGE_MANAGER}
+    SCHEDULE_NAME: dependabot
+    RAILS_ENV: production
+    SETTINGS__GITLAB_URL: $CI_SERVER_URL
+    SETTINGS__STANDALONE: "true"
+  before_script:
+    - cd /home/dependabot/app
+  script:
+    - bundle exec rake "dependabot:update[$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME,$PACKAGE_MANAGER,/]"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_NAME == ${SCHEDULE_NAME}'
