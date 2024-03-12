@@ -1,5 +1,18 @@
-# Workflow only runs after the specified workflows have concluded running to completion. It then checks if they have
-# been successful or failed. Appropriate messages are then sent afterwards on each event type
+# Workflow to post notifications to Slack of status of builds.
+# This workflow template sends notifications to Slack when pipeline succeeds
+
+# Required Variables:
+# slack_webhook: Slack Webhook URL
+
+# Optional Variables:
+# slack_channel: Slack channel to post to
+# slack_color: Slack color to post
+# slack_icon: Slack icon to use when posting message
+# slack_icon_emoji: Emoji Icon to post Slack messages with
+# slack_username: Slack username to use when posting to Slack, this does not have to be a 'real' username
+# slack_title: Slack Title to post the message with
+# slack_message: message of the Slack notification
+# slack_footer: Footer of the message
 # Ref https://github.com/rtCamp/action-slack-notify
 name: Re-useable Slack Notification
 
@@ -21,6 +34,27 @@ on:
         required: false
         default: https://github.com/ratholos.png?size=48
         type: string
+      slack_color:
+        description: Slack Color
+        required: false
+        default: "good"
+        type: string
+      slack_icon_emoji:
+        description: Slack Icon Emoji
+        required: false
+        default: ":large_green_circle:"
+        type: string
+      slack_message:
+        description: Slack Message
+        required: false
+        default: "Success"
+        type: string
+      slack_title:
+        description: Slack Message Title
+        required: false
+        default: ${{ github.repository }} - ${{ github.event.workflow_run.name }} Workflow Run
+        type: string
+      
     secrets:
       slack_webhook:
         description: 'Slack Webhook'
@@ -28,10 +62,9 @@ on:
 
 
 jobs:
-  onSuccess:
+  onNotification:
     name: Success Notification
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - uses: actions/checkout@v2
@@ -42,32 +75,11 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: ${{ inputs.slack_channel }}
-          SLACK_COLOR: "good"
+          SLACK_COLOR: ${{ inputs.slack_color }}
           SLACK_ICON: ${{ inputs.slack_icon }}
-          SLACK_ICON_EMOJI: ":large_green_circle:"
+          SLACK_ICON_EMOJI: ${{ inputs.slack_icon_emoji }}
           SLACK_USERNAME: ${{ inputs.slack_username }}
-          SLACK_TITLE: ${{ github.repository }} - ${{ github.event.workflow_run.name }} Workflow Succeeded
-          SLACK_MESSAGE: 'Success'
-          SLACK_FOOTER: "Regards, ${{ inputs.slack_username }}"
-          SLACK_WEBHOOK: ${{ secrets.slack_webhook }}
-
-  onFailure:
-    name: Failure Notification
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_CHANNEL: ${{ inputs.slack_channel }}
-          SLACK_COLOR: "danger"
-          SLACK_ICON: ${{ inputs.slack_icon }}
-          SLACK_ICON_EMOJI: ":red_circle:"
-          SLACK_USERNAME: ${{ inputs.slack_username }}
-          SLACK_TITLE: ${{ github.repository }} - ${{ github.event.workflow_run.name }} Workflow Failed
-          SLACK_MESSAGE: ':cry:'
+          SLACK_TITLE: ${{ inputs.slack_title }}
+          SLACK_MESSAGE: ${{ inputs.slack_message }}
           SLACK_FOOTER: "Regards, ${{ inputs.slack_username }}"
           SLACK_WEBHOOK: ${{ secrets.slack_webhook }}
