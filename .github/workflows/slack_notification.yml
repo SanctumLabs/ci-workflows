@@ -60,10 +60,9 @@ on:
         description: 'Slack Webhook'
         required: true
 
-
 jobs:
   onNotification:
-    name: Success Notification
+    name: Slack Notification
     runs-on: ubuntu-latest
 
     steps:

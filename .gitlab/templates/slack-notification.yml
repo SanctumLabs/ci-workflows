@@ -57,6 +57,6 @@ slack-failure:
   variables:
     SLACK_FALLBACK: "Job failure - ${CI_PROJECT_NAME}"
     SLACK_COLOR: "danger"
-    SLACK_TITLE: "Job Failure  - ${CI_PROJECT_NAME}"
+    SLACK_TITLE: "Job Failure - ${CI_PROJECT_NAME}"
     SLACK_TEXT: "Failure running job"
   when: on_failure
