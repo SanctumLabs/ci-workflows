@@ -1,0 +1,80 @@
+name: 'Re-useable Python Test Action'
+description: 'Github Action for running Python tests'
+
+inputs:
+  packager:
+    description: Python Package manager to use, e.g pip, poetry, pipenv
+    required: false
+    default: poetry
+
+  command:
+    description: Command to run for running tests
+    required: true
+
+  python-version:
+    description: Python Version to use
+    default: '3.10'
+    required: false
+
+  upload-coverage:
+    description: Whether to upload coverage reports
+    default: 'false'
+    required: false
+
+  codacy_token:
+    description: 'Codacy Project token for uploading coverage to Codacy'
+    required: false
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Ref: https://github.com/jenseng/dynamic-uses
+    - name: Setup 
+      uses: jenseng/dynamic-uses@v1
+      with:
+        uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}@main
+        with: '{ "python-version": "${{ inputs.python-version }}" }'
+
+    - name: Run tests
+      shell: bash
+      run: ${{ inputs.command }}
+
+    - name: Upload Test coverage reports
+      if: ${{ inputs.upload-coverage }}
+      uses: codecov/codecov-action@v3
+
+    - name: Check for Codacy Token Secret availability
+      if: ${{ inputs.upload-coverage }}
+      id: codacy-secret-check
+      # perform secret check & put boolean result as an output
+      shell: bash
+      run: |
+        if [ "${{ secrets.codacy_token }}" != '' ]; then
+          echo "available=true" >> $GITHUB_OUTPUT;
+        else
+          echo "available=false" >> $GITHUB_OUTPUT;
+        fi
+
+    - name: Check Inadequate Permissions
+      if: ${{ steps.codacy-secret-check.outputs.available != 'true' && inputs.upload-coverage }}
+      # provide feedback for likely problem, note dependabot cannot access
+      # secrets by default. Secondly, this step forces job to exit with a code of 0. This secret may be missing intentionally
+      shell: bash
+      run: |
+        if [ "${{ github.actor }}" == "dependabot[bot]" ]; then
+          echo >&2 "Unable to access secrets as unprivileged dependabot.";
+        else
+          echo >&2 "Inadequate Permissions or missing secret value";
+        fi
+        exit 0
+        
+    - name: Run codacy-coverage-reporter
+      shell: bash
+      if: ${{ steps.codacy-secret-check.outputs.available == 'true' && inputs.upload-coverage }}
+      env:
+        CODACY_PROJECT_TOKEN: ${{ secrets.codacy_token }}
+      run: bash <(curl -Ls https://coverage.codacy.com/get.sh)

@@ -1,0 +1,98 @@
+name: Re-useable Python Test Workflow with a Postgres database setup
+
+on:
+  workflow_call:
+    inputs:
+      packager:
+        description: Python Package manager to use, e.g pip, poetry, pipenv
+        required: false
+        default: poetry
+        type: string
+
+      command:
+        description: Command to run for running tests
+        required: true
+        type: string
+
+      python-version:
+        description: Python Version to use
+        default: '3.10'
+        required: false
+        type: string
+
+      upload-coverage:
+        description: Whether to upload coverage reports
+        default: false
+        required: false
+        type: boolean
+
+      postgres-database-version:
+        description: The postgres database version to use for running tests
+        default: 16.2-alpine
+        required: false
+        type: string
+
+      database-name:
+        description: The database name to use for running tests
+        default: db
+        required: false
+        type: string
+    
+      database-username:
+        description: The database username to use for running tests
+        default: dbuser
+        required: false
+        type: string
+    
+      database-password:
+        description: The database name to use for running tests
+        default: dbpassword
+        required: false
+        type: string
+    
+      database-port:
+        description: The database port to use for running tests
+        default: 5432
+        required: false
+        type: number
+
+    secrets:
+      codacy_token:
+        description: 'Codacy Project token for uploading coverage to Codacy'
+        required: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        # conditionally sets the database image based on whether the database name has been set. If nont has been set, the docker container will not be span up
+        # this is currently a workaround on conditional setting of starting a postgres container
+        # see https://github.com/actions/runner/issues/822
+        image: ${{ inputs.database-name != '' && format('postgres:{0}', inputs.postgres-database-version) || '' }}
+        env:
+          POSTGRES_DB: ${{ inputs.database-name }}
+          POSTGRES_USER: ${{ inputs.database-username }}
+          POSTGRES_PASSWORD: ${{ inputs.database-password }}
+        ports:
+          - ${{ inputs.database-port }}:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Ref: https://github.com/jenseng/dynamic-uses
+      - name: Setup 
+        uses: sanctumlabs/ci-workflows/.github/actions/python-test
+        with:
+          packager: ${{ inputs.packager }}
+          command: ${{ inputs.command }}
+          python-version: ${{ inputs.python-version }}
+          codacy_token: ${{ secrets.codacy_token }}
+          upload-coverage: ${{ inputs.upload-coverage }}
