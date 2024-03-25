@@ -53,7 +53,7 @@ runs:
       # perform secret check & put boolean result as an output
       shell: bash
       run: |
-        if [ "${{ secrets.codacy_token }}" != '' ]; then
+        if [ "${{ inputs.codacy_token }}" != '' ]; then
           echo "available=true" >> $GITHUB_OUTPUT;
         else
           echo "available=false" >> $GITHUB_OUTPUT;
@@ -76,5 +76,5 @@ runs:
       shell: bash
       if: ${{ steps.codacy-secret-check.outputs.available == 'true' && inputs.upload-coverage }}
       env:
-        CODACY_PROJECT_TOKEN: ${{ secrets.codacy_token }}
+        CODACY_PROJECT_TOKEN: ${{ inputs.codacy_token }}
       run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
