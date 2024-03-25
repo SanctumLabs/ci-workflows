@@ -16,7 +16,7 @@ on:
 
       python-version:
         description: Python Version to use
-        default: '3.10'
+        default: "3.10"
         required: false
         type: string
 
@@ -37,19 +37,19 @@ on:
         default: db
         required: false
         type: string
-    
+
       database-username:
         description: The database username to use for running tests
         default: dbuser
         required: false
         type: string
-    
+
       database-password:
         description: The database name to use for running tests
         default: dbpassword
         required: false
         type: string
-    
+
       database-port:
         description: The database port to use for running tests
         default: 5432
@@ -58,7 +58,7 @@ on:
 
     secrets:
       codacy_token:
-        description: 'Codacy Project token for uploading coverage to Codacy'
+        description: "Codacy Project token for uploading coverage to Codacy"
         required: false
 
 jobs:
@@ -87,12 +87,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Ref: https://github.com/jenseng/dynamic-uses
-      - name: Setup 
-        uses: sanctumlabs/ci-workflows/.github/actions/python-test
+      - name: Run tests
+        # Ref: https://github.com/jenseng/dynamic-uses
+        uses: jenseng/dynamic-uses@v1
         with:
-          packager: ${{ inputs.packager }}
-          command: ${{ inputs.command }}
-          python-version: ${{ inputs.python-version }}
-          codacy_token: ${{ secrets.codacy_token }}
-          upload-coverage: ${{ inputs.upload-coverage }}
+          uses: sanctumlabs/ci-workflows/.github/actions/python-test@main
+          with: '{ "python-version": "${{ inputs.python-version }}", "command": "${{ inputs.command }}", "packager": "${{ inputs.packager }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'
