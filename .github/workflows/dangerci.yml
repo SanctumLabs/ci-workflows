@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use NodeJS ${{ inputs.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
 
@@ -35,7 +35,7 @@ jobs:
         id: cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         id: cache # use this to check for `cache-hit` (`steps.cache.outputs.cache-hit != 'true'`)
         with:
           path: |
