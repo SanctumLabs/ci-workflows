@@ -4,7 +4,7 @@ name: Re-useable Semantic Release Workflow
 on:
   workflow_call:
     secrets:
-      github_token:
+      token:
         description: 'Github token for uploading releases to Github'
         required: true
 
@@ -37,4 +37,4 @@ jobs:
       - name: Release
         run: npx semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
+          GITHUB_TOKEN: ${{ secrets.token }}
