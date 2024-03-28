@@ -4,7 +4,7 @@ name: Re-useable Danger CI
 on:
   workflow_call:
     inputs:
-      node_version:
+      node-version:
         description: Node version to use
         required: false
         type: string
@@ -26,10 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Use NodeJS ${{ inputs.node_version }}
+      - name: Use NodeJS ${{ inputs.node-version }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ inputs.node_version }}
+          node-version: ${{ inputs.node-version }}
 
       - name: Get yarn cache directory path
         id: cache-dir-path
