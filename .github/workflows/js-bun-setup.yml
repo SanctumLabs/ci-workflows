@@ -1,0 +1,37 @@
+# Used to run builds with bun as the package manager
+name: Re-useable Bun Build Workflow
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Working Directory to use
+        required: false
+        default: /
+        type: string
+      command:
+        description: Command to run for running builds
+        required: true
+        type: string
+      bun-version:
+        description: Bun Version to use
+        default: '1.0.33'
+        required: false
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun 
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ inputs.bun-version }}
+ 
+      - name: Run ${{ inputs.command }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.command }}

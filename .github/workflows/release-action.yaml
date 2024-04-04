@@ -1,0 +1,14 @@
+# Releases new versions of the Github actions & workflows
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Release
+    uses: SanctumLabs/ci-workflows/.github/workflows/release-semantic.yml@main
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
