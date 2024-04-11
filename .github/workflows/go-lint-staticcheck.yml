@@ -1,0 +1,50 @@
+name: Reuseable Go lint Static Check workflow
+
+on:
+  workflow_call:
+    inputs:
+        platform:
+          description: Platform to run on
+          default: 'ubuntu-latest'
+          type: string
+          required: false
+        go-version:
+          description: Go Version to use
+          default: '1.20'
+          type: string
+          required: false
+        cache:
+          description: whether to cache dependencies
+          default: true
+          type: boolean
+          required: false
+        cache-key:
+          description: The cache key to use for static check
+          default: ''
+          type: string
+          required: false  
+        version:
+          description: The version for static check
+          default: 'latest'
+          type: string
+          required: false  
+
+jobs:
+  lint:
+    runs-on: ${{ inputs.platform }}
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Install Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: ${{ inputs.go-version }}
+            cache: ${{ inputs.cache }}
+
+        - name: static check
+          uses: dominikh/staticcheck-action@v1.2.0
+          with:
+            version: ${{ inputs.version }}
+            install-go: false
+            cache-key: ${{ inputs.cache-key != '' && inputs.cache-key || runner.os }}

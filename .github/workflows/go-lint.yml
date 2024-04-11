@@ -1,0 +1,43 @@
+name: Reuseable Go lint workflow
+
+on:
+  workflow_call:
+    inputs:
+        platform:
+          description: Platform to run on
+          default: 'ubuntu-latest'
+          type: string
+          required: false
+        go-version:
+          description: Go Version to use
+          default: '1.20'
+          type: string
+          required: false
+        cache:
+          description: whether to cache dependencies
+          default: true
+          type: boolean
+          required: false
+        working-directory:
+          description: The working directory to run linting
+          default: '.'
+          type: string
+          required: false  
+
+jobs:
+  lint:
+    runs-on: ${{ inputs.platform }}
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Install Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: ${{ inputs.go-version }}
+            cache: ${{ inputs.cache }}
+
+        - name: golangci-lint
+          uses: golangci/golangci-lint-action@v4
+          with:
+            working-directory: ${{ inputs.working-directory }}
