@@ -1,0 +1,63 @@
+name: 'Setup Python UV'
+description: 'Github Action for setting up Python with UV'
+
+inputs:
+  python-version:
+    description: Version of Python to use
+    required: false
+    default: '3.12'
+
+  uv-version:
+    description: UV Version
+    required: false
+    default: latest
+
+  enable-cache:
+    description: Enable Caching
+    required: false
+    default: true
+
+  cache-dependency-glob:
+    description: Cache Glob
+    required: false
+    default: "uv.lock"
+
+runs:
+  using: "composite"
+  steps:
+    #---------------------------#
+    #       Set-up python       #
+    #---------------------------#
+    - name: Set up python ${{ inputs.python-version }}
+      id: setup-python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    #----------------------------------------#
+    #       Install & configure UV           #            
+    #----------------------------------------#
+    - name: Load cached UV Binary
+      id: cached-uv-binary
+      uses: actions/cache@v4
+      with:
+        path: ~/.local
+        key: uv-${{ runner.os }}-${{ inputs.uv-version }}-${{ hashFiles('uv.lock') }}
+        restore-keys: |
+            uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+            uv-${{ runner.os }}
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: ${{ inputs.uv-version }}
+        enable-cache: ${{ inputs.enable-cache }}
+        cache-dependency-glob: ${{ inputs.cache-dependency-glob }}
+
+    #----------------------------------------------------------#
+    #       Install dependencies if cache does not exist       #
+    #----------------------------------------------------------#
+    - name: Install dependencies
+      if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
+      shell: bash
+      run: uv install

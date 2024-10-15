@@ -29,6 +29,11 @@ on:
         default: 'check'
         required: false
         type: string
+      changed-files:
+        description: Whether to run on changed files alone
+        default: 'false'
+        required: false
+        type: string
 
 jobs:
   lint:
@@ -45,8 +50,9 @@ jobs:
           with: '{ "python-version": "${{ inputs.python-version }}" }'
       
       - name: Linting with Ruff
-        uses: chartboost/ruff-action@v1
+        uses: astral-sh/ruff-action@v1
         with:
             version: ${{ inputs.ruff-version }}
             src: ${{ inputs.directory }}
             args: ${{ inputs.ruff-args }}
+            changed-files: ${{ inputs.changed-files }}
