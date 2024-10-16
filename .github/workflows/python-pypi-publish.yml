@@ -7,20 +7,31 @@ on:
         description: Python Package manager to use, e.g pip, poetry, pipenv
         required: false
         default: poetry
-        type: string      
-      command: 
+        type: string
+      command:
         description: Command to run for publishing to PyPI
         required: true
         type: string
       python-version:
         description: Python Version to use
-        default: '3.10'
+        default: "3.10"
         required: false
         type: string
       version:
         description: Version of package
         required: true
         type: string
+      install-command:
+        description: Command to use to install dependencies
+        default: "uv pip install -r pyproject.toml --all-extras"
+        required: false
+        type: string
+      virtual-env-dir:
+        description: Virtual environment directory
+        default: ".venv"
+        required: false
+        type: string
+
     secrets:
       pypi_token:
         description: PyPI Token to use for publishing
@@ -35,11 +46,11 @@ jobs:
         uses: actions/checkout@v4
 
       # Ref: https://github.com/jenseng/dynamic-uses
-      - name: Setup 
+      - name: Setup
         uses: jenseng/dynamic-uses@v1
         with:
           uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}@main
-          with: '{ "python-version": "${{ inputs.python-version }}" }'
+          with: '{ "python-version": "${{ inputs.python-version }}", "install-command": "${{ inputs.install-command }}", "virtual-env-directory": "${{ inputs.virtual-env-dir }}" }'
 
       - name: Publish
         env:
