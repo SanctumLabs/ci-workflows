@@ -11,27 +11,32 @@ on:
         type: string
       python-version:
         description: Python Version to use
-        default: '3.10'
+        default: "3.10"
         required: false
         type: string
       ruff-version:
         description: Ruff version to use
-        default: '0.3.5'
+        default: "0.3.5"
         required: false
         type: string
       directory:
         description: Source directory to lint
-        default: '.'
+        default: "."
         required: false
         type: string
       ruff-args:
         description: Arguments to pass to ruff
-        default: 'check'
+        default: "check"
         required: false
         type: string
       changed-files:
         description: Whether to run on changed files alone
-        default: 'false'
+        default: "false"
+        required: false
+        type: string
+      install-command:
+        description: Command to use to install dependencies
+        default: "uv pip install -r pyproject.toml --all-extras"
         required: false
         type: string
 
@@ -47,12 +52,12 @@ jobs:
         uses: jenseng/dynamic-uses@v1
         with:
           uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}@main
-          with: '{ "python-version": "${{ inputs.python-version }}" }'
-      
+          with: '{ "python-version": "${{ inputs.python-version }}", "install-command": "${{ inputs.install-command }}" }'
+
       - name: Linting with Ruff
         uses: astral-sh/ruff-action@v1
         with:
-            version: ${{ inputs.ruff-version }}
-            src: ${{ inputs.directory }}
-            args: ${{ inputs.ruff-args }}
-            changed-files: ${{ inputs.changed-files }}
+          version: ${{ inputs.ruff-version }}
+          src: ${{ inputs.directory }}
+          args: ${{ inputs.ruff-args }}
+          changed-files: ${{ inputs.changed-files }}

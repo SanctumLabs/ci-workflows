@@ -22,6 +22,11 @@ inputs:
     required: false
     default: "uv.lock"
 
+  install-command:
+    description: Command to install dependencies
+    required: false
+    default: uv pip install -r pyproject.toml --all-extras
+
 runs:
   using: "composite"
   steps:
@@ -60,4 +65,4 @@ runs:
     - name: Install dependencies
       if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
       shell: bash
-      run: uv install
+      run: ${{ inputs.install-command }}
