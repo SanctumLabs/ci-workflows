@@ -22,6 +22,11 @@ inputs:
     required: false
     default: "uv.lock"
 
+  virtual-env-directory:
+    description: Virtual environment directory
+    required: false
+    default: .venv
+
   install-command:
     description: Command to install dependencies
     required: false
@@ -65,4 +70,6 @@ runs:
     - name: Install dependencies
       if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
       shell: bash
-      run: ${{ inputs.install-command }}
+      run: |
+        uv venv ${{ inputs.virtual-env-directory }}
+        ${{ inputs.install-command }}

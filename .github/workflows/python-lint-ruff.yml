@@ -39,6 +39,11 @@ on:
         default: "uv pip install -r pyproject.toml --all-extras"
         required: false
         type: string
+      virtual-env-dir:
+        description: Virtual environment directory
+        default: ".venv"
+        required: false
+        type: string
 
 jobs:
   lint:
@@ -52,7 +57,7 @@ jobs:
         uses: jenseng/dynamic-uses@v1
         with:
           uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}@main
-          with: '{ "python-version": "${{ inputs.python-version }}", "install-command": "${{ inputs.install-command }}" }'
+          with: '{ "python-version": "${{ inputs.python-version }}", "install-command": "${{ inputs.install-command }}", "virtual-env-directory": "${{ inputs.virtual-env-dir }}" }'
 
       - name: Linting with Ruff
         uses: astral-sh/ruff-action@v1
