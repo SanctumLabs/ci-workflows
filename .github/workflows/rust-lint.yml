@@ -1,4 +1,4 @@
-name: Reusable Rust Test Workflow
+name: Reusable Rust Lint Workflow
 
 on:
   workflow_call:
@@ -12,7 +12,7 @@ on:
         description: The profile to use
         default: 'release'
         type: string
-        required: false        
+        required: false
       platform:
         description: Platform to run on
         default: 'ubuntu-latest'
@@ -33,7 +33,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  test:
+  lint:
 
     runs-on: ${{ inputs.platform }}
     steps:
@@ -49,5 +49,10 @@ jobs:
             target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Test
-      run: cargo test --profile ${{ inputs.profile }} --verbose
+    - name: Lint
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        components: rustfmt
+
+    - name: Rustfmt Check
+      uses: actions-rust-lang/rustfmt@v1
