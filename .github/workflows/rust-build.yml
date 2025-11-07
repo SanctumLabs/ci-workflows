@@ -1,0 +1,48 @@
+name: Reusable Rust Build Workflow
+
+on:
+  workflow_call:
+    inputs:
+      rust-version:
+        description: Rust version to use
+        default: 'stable'
+        type: string
+        required: false
+      platform:
+        description: Platform to run on
+        default: 'ubuntu-latest'
+        type: string
+        required: false
+      cache:
+        description: whether to cache dependencies
+        default: true
+        type: boolean
+        required: false
+      working-directory:
+        description: The working directory to run the build
+        default: '.'
+        type: string
+        required: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ${{ inputs.platform }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Build
+      run: cargo build --verbose
