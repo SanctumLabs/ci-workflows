@@ -1,4 +1,4 @@
-name: Reusable Rust Build Workflow
+name: Reusable Rust Test Workflow
 
 on:
   workflow_call:
@@ -33,7 +33,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test:
 
     runs-on: ${{ inputs.platform }}
     steps:
@@ -50,4 +50,4 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
     - name: Build
-      run: cargo build --profile ${{ inputs.profile }} --verbose
+      run: cargo test --profile ${{ inputs.profile }} --verbose
