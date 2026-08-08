@@ -18,6 +18,11 @@ on:
         default: '1.3.3'
         required: false
         type: string
+      build-dir:
+        description: Build directory that will be uploaded to artifacts
+        default: build
+        type: string
+        required: false
 
 jobs:
   build:
@@ -31,7 +36,12 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ inputs.bun-version }}
- 
+
       - name: Run ${{ inputs.command }}
         working-directory: ${{ inputs.working-directory }}
         run: ${{ inputs.command }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: build
+          path: ${{ inputs.build-dir }}
