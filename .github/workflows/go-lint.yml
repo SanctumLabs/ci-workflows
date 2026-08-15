@@ -1,3 +1,21 @@
+# Reusable Go lint workflow
+# 
+# Usage:
+# name: Lint # Name of the workflow
+#
+# on: [ push ]
+#
+# permissions:
+#   contents: read
+#   pull-requests: read
+#
+# jobs:
+#   lint: # name of the job
+#      name: Lint
+#      uses: SanctumLabs/ci-workflows/.github/workflows/go-lint.yml@main
+#      with:
+#        go-version: 1.25 # Go version to use
+
 name: Reuseable Go lint workflow
 
 on:
