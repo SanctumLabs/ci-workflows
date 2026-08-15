@@ -1,0 +1,163 @@
+# Reusable Go Test workflow that uses a database and cache docker containers.
+# The database andn cache docker containers are optional and are not required. If they are
+# specified, the containers will be span up.
+# The default images for the docker containers are Postgres for the database and Redis for the cache
+# 
+# Usage:
+# name: Test # Name of the workflow
+#
+# on: [ push ]
+#
+# permissions:
+#   contents: read
+#   pull-requests: read
+#
+# jobs:
+#   test: # name of the job
+#      name: Lint
+#      uses: SanctumLabs/ci-workflows/.github/workflows/go-test.yml@main
+#      with:
+#        go-version: 1.25 # Go version to use
+#        command: make test.integration # command to run tests
+
+name: Reuseable Go Test workflow
+
+on:
+  workflow_call:
+    inputs:
+        platform:
+          description: Platform to run on
+          default: 'ubuntu-latest'
+          type: string
+          required: false
+        go-version:
+          description: Go Version to use
+          default: '1.25'
+          type: string
+          required: false
+        cache:
+          description: whether to cache dependencies
+          default: true
+          type: boolean
+          required: false
+        command:
+          description: The command to run
+          type: string
+          required: true
+
+        upload-coverage:
+          description: Whether to upload coverage reports for tests
+          default: false
+          required: false
+          type: boolean
+          
+       # Database container settings
+        database-image-name:
+          description: The database image name to use for running tests, this is required
+          default: ''
+          required: false
+          type: string
+
+        database-image-version:
+          description: The database version to use for running tests, defaults to latest if not specified
+          default: latest
+          required: false
+          type: string
+          
+        database-name:
+          description: The database name to use for running tests
+          default: db
+          required: false
+          type: string
+  
+        database-username:
+          description: The database username to use for running tests
+          default: dbuser
+          required: false
+          type: string
+  
+        database-password:
+          description: The database name to use for running tests
+          default: dbpassword
+          required: false
+          type: string
+  
+        database-port:
+          description: The database port to use for running tests
+          default: 5432
+          required: false
+          type: number
+
+        database-port-internal:
+          description: The internal database port for the running container
+          default: 5432
+          required: false
+          type: number
+
+        # --- cache service ---
+        cache-image:
+          description: Cache image, e.g. redis. Empty disables this service.
+          default: ''
+          required: false
+          type: string
+        cache-version:
+          description: The docker image version
+          default: 'latest'
+          required: false
+          type: string
+        cache-port:
+          description: Cache host port the application connects to
+          default: 6379
+          required: false
+          type: number
+        cache-port-internal:
+          description: Cache internal port the docker container runs on
+          default: 6379
+          required: false
+          type: number
+
+    secrets:
+      codacy_token:
+        description: "Codacy Project token for uploading coverage to Codacy"
+        required: false
+ 
+jobs:
+  test:
+    runs-on: ${{ inputs.platform }}
+  
+    services:
+      database:
+        # conditionally sets the database image based on whether the database name has been set. If nont has been set, the docker container will not be span up
+        # this is currently a workaround on conditional setting of starting a postgres container
+        # see https://github.com/actions/runner/issues/822
+        # Ref: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idservicesservice_idimage
+        image: ${{ inputs.database-name != '' && format('{0}:{1}', inputs.database-image-name, inputs.database-image-version) || '' }}
+        ports:
+          - ${{ inputs.database-port }}:${{ inputs.database-port-internal }}
+        env:
+          POSTGRES_DB: ${{ inputs.database-name }}
+          POSTGRES_USER: ${{ inputs.database-username }}
+          POSTGRES_PASSWORD: ${{ inputs.database-password }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      cache:
+        image: ${{ inputs.cache-image != '' && format('{0}:{1}', inputs.cache-image, inputs.cache-version) || '' }}
+        ports:
+          - ${{ inputs.cache-port }}:${{ inputs.cache-port-internal }}
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Run tests
+        # Ref: https://github.com/jenseng/dynamic-uses
+        uses: jenseng/dynamic-uses@v1
+        with:
+          uses: sanctumlabs/ci-workflows/.github/actions/go@main
+          with: '{ "platform-version": "${{ inputs.platform }}", "command": "${{ inputs.command }}", "cache": "${{ inputs.cache }}", "go-version": "${{ inputs.go-version }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'          
