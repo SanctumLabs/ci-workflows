@@ -1,0 +1,63 @@
+# Reusable Go workflow
+# Usage: 
+#  name: Build # Name of your workflow
+#
+#  on:
+#    - push
+#    - pull_request
+#
+#  permissions:
+#    contents: read
+#    pull-requests: read
+#
+#  jobs:
+#    build: # Name of the job to run
+#      strategy:
+#        matrix:
+#          go-version: [ '1.25' ]
+#      name: Build
+#      uses: SanctumLabs/ci-workflows/.github/workflows/go.yml@main
+#      with:
+#        go-version: ${{ matrix.go-version }}
+#        command: make build # custom command you want to execute
+
+name: Reuseable Go workflow
+
+on:
+  workflow_call:
+    inputs:
+        platform:
+          description: Platform to run on
+          default: 'ubuntu-latest'
+          type: string
+          required: false
+        go-version:
+          description: Go Version to use
+          default: '1.25'
+          type: string
+          required: false
+        cache:
+          description: whether to cache dependencies
+          default: true
+          type: boolean
+          required: false
+        command:
+          description: The command to run
+          type: string
+          required: true
+
+jobs:
+  runner:
+    runs-on: ${{ inputs.platform }}
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v7
+
+        - name: Install Go
+          uses: actions/setup-go@v7
+          with:
+            go-version: ${{ inputs.go-version }}
+            cache: ${{ inputs.cache }}
+
+        - name: Running command ${{ inputs.command }}
+          run: ${{ inputs.command}}
