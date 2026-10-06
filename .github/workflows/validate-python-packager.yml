@@ -18,6 +18,9 @@ on:
       - ".github/workflows/validate-python-packager.yml"
       - "tests/test_python_packager_contract.sh"
 
+permissions:
+  contents: read
+
 jobs:
   contract:
     runs-on: ubuntu-latest
