@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       packager:
-        description: Python Package manager to use, e.g pip, poetry, pipenv
+        description: "Supported package managers: poetry, uv."
         required: false
         default: poetry
         type: string
@@ -86,6 +86,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate Python packager
+        uses: sanctumlabs/ci-workflows/.github/actions/validate-python-packager@main
+        with:
+          packager: ${{ inputs.packager }}
 
       - name: Run tests
         # Ref: https://github.com/jenseng/dynamic-uses
