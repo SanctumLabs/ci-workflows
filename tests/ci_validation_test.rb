@@ -9,6 +9,7 @@ class CIValidationTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
   VALIDATOR = File.join(ROOT, "scripts/validate-ci-templates.rb")
   FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/gitlab-template.yml")
+  WORKFLOW_FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/go-workflow-consumer.yml")
 
   def run_validator(path)
     Open3.capture3(RbConfig.ruby, VALIDATOR, path)
@@ -16,6 +17,12 @@ class CIValidationTest < Minitest::Test
 
   def test_accepts_representative_gitlab_script
     _stdout, stderr, status = run_validator(FIXTURE)
+
+    assert status.success?, stderr
+  end
+
+  def test_accepts_representative_reusable_workflow_consumer
+    _stdout, stderr, status = run_validator(WORKFLOW_FIXTURE)
 
     assert status.success?, stderr
   end

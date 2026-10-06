@@ -1,0 +1,13 @@
+name: Reusable Go test consumer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: SanctumLabs/ci-workflows/.github/workflows/go-test.yml@main
+    with:
+      command: go test ./...

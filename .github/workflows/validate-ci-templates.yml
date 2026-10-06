@@ -27,7 +27,9 @@ jobs:
             -ignore 'the runner of "docker/metadata-action@v4" action is too old to run on GitHub Actions' \
             -ignore 'the runner of "docker/metadata-action@v3" action is too old to run on GitHub Actions' \
             -ignore 'the runner of "codecov/codecov-action@v3" action is too old to run on GitHub Actions' \
-            -ignore 'the runner of "softprops/action-gh-release@v1" action is too old to run on GitHub Actions'
+            -ignore 'the runner of "softprops/action-gh-release@v1" action is too old to run on GitHub Actions' \
+            .github/workflows/*.yaml .github/workflows/*.yml \
+            tests/fixtures/ci-validation/go-workflow-consumer.yml
         shell: bash
 
       - name: Validate workflow and GitLab metadata

@@ -13,7 +13,8 @@ rescue StandardError => error
 end
 
 def validate_workflow(path, document)
-  return unless path.match?(%r{(?:^|/)\.github/workflows/})
+  return unless path.match?(%r{(?:^|/)\.github/workflows/}) ||
+                document.key?("on") || document.key?(true)
 
   unless document.key?("name") && document.key?("jobs") && document["jobs"].is_a?(Hash)
     raise "#{path}: workflow must define name and jobs"
