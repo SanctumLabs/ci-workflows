@@ -156,8 +156,10 @@ jobs:
 
     steps:
       - name: Run tests
-        # Ref: https://github.com/jenseng/dynamic-uses
-        uses: jenseng/dynamic-uses@v1
+        uses: SanctumLabs/ci-workflows/.github/actions/go@main
         with:
-          uses: sanctumlabs/ci-workflows/.github/actions/go@main
-          with: '{ "platform-version": "${{ inputs.platform }}", "command": "${{ inputs.command }}", "cache": "${{ inputs.cache }}", "go-version": "${{ inputs.go-version }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'          
+          command: ${{ inputs.command }}
+          go-version: ${{ inputs.go-version }}
+          cache: ${{ inputs.cache }}
+          upload-coverage: ${{ inputs.upload-coverage }}
+          codacy_token: ${{ secrets.codacy_token }}

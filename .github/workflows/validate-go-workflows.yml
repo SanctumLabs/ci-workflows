@@ -1,0 +1,24 @@
+name: Validate Go workflows
+
+on:
+  push:
+    paths:
+      - '.github/actions/go/action.yml'
+      - '.github/workflows/go*.yml'
+      - 'test/go_workflow_contract_test.rb'
+  pull_request:
+    paths:
+      - '.github/actions/go/action.yml'
+      - '.github/workflows/go*.yml'
+      - 'test/go_workflow_contract_test.rb'
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      - name: Validate Go workflow and action contracts
+        run: ruby test/go_workflow_contract_test.rb
