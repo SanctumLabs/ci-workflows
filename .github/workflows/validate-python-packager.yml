@@ -1,0 +1,32 @@
+name: Validate Python packager contract
+
+on:
+  pull_request:
+    paths:
+      - ".github/actions/validate-python-packager/**"
+      - ".github/actions/python-test/action.yml"
+      - ".github/workflows/python-*.yml"
+      - ".github/workflows/validate-python-packager.yml"
+      - "tests/test_python_packager_contract.sh"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/actions/validate-python-packager/**"
+      - ".github/actions/python-test/action.yml"
+      - ".github/workflows/python-*.yml"
+      - ".github/workflows/validate-python-packager.yml"
+      - "tests/test_python_packager_contract.sh"
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test supported and unsupported packagers
+        run: bash tests/test_python_packager_contract.sh

@@ -47,32 +47,29 @@ jobs:
           scope: ${{ inputs.scope }}
 
       - name: Check for provided directory
-        if: ${{ inputs.directory }}
         id: directory-check
-        # perform directory check & put boolean result as an output
+        env:
+          PACKAGE_DIRECTORY: ${{ inputs.directory }}
         shell: bash
         run: |
-          if [ "${{ inputs.directory }}" != '' ]; then
-            echo "changeDir=true" >> $GITHUB_OUTPUT;
+          if [[ -n "$PACKAGE_DIRECTORY" ]]; then
+            echo "changeDir=true" >> "$GITHUB_OUTPUT"
           else
-            echo "changeDir=false" >> $GITHUB_OUTPUT;
+            echo "changeDir=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish from ${{ inputs.directory }}
         env:
           NPM_TOKEN: ${{ secrets.npmAuthToken }}
+          PACKAGE_DIRECTORY: ${{ inputs.directory }}
+          PACKAGE_VERSION: ${{ inputs.version }}
         if: ${{ steps.directory-check.outputs.changeDir == 'true' }}
-        run: |
-          cd ${{ inputs.directory }}
-          npm ci
-          npm version ${{ inputs.version }}
-          npm publish
+        run: bash .github/scripts/publish-npm.sh
 
       - name: Publish from root directory
         env:
           NPM_TOKEN: ${{ secrets.npmAuthToken }}
+          PACKAGE_DIRECTORY: ""
+          PACKAGE_VERSION: ${{ inputs.version }}
         if: ${{ steps.directory-check.outputs.changeDir != 'true' }}
-        run: |
-          npm ci
-          npm version ${{ inputs.version }}
-          npm publish
+        run: bash .github/scripts/publish-npm.sh
