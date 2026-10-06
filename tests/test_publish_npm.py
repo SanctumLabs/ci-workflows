@@ -90,7 +90,17 @@ class PublishNpmWorkflowTests(unittest.TestCase):
 
         self.assertIn("steps.directory-check.outputs.changeDir", workflow)
         self.assertNotIn("steps.directory-check.ouputs", workflow)
+        self.assertIn(
+            "if: ${{ steps.directory-check.outputs.changeDir == 'true' }}",
+            workflow,
+        )
+        self.assertIn(
+            "if: ${{ steps.directory-check.outputs.changeDir != 'true' }}",
+            workflow,
+        )
         self.assertIn("PACKAGE_DIRECTORY: ${{ inputs.directory }}", workflow)
+        self.assertIn('PACKAGE_DIRECTORY: ""', workflow)
+        self.assertEqual(workflow.count("run: bash .github/scripts/publish-npm.sh"), 2)
         self.assertNotIn("cd ${{ inputs.directory }}", workflow)
 
 
