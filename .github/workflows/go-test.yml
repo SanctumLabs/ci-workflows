@@ -162,4 +162,4 @@ jobs:
           go-version: ${{ inputs.go-version }}
           cache: ${{ inputs.cache }}
           upload-coverage: ${{ inputs.upload-coverage }}
-          codacy-token: ${{ secrets.codacy_token }}
+          codacy_token: ${{ secrets.codacy_token }}

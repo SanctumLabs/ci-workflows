@@ -21,7 +21,7 @@ inputs:
     default: 'false'
     required: false
 
-  codacy-token:
+  codacy_token:
     description: Codacy project token for uploading coverage
     required: false
 
@@ -50,7 +50,7 @@ runs:
       id: codacy-secret-check
       shell: bash
       env:
-        CODACY_PROJECT_TOKEN: ${{ inputs.codacy-token }}
+        CODACY_PROJECT_TOKEN: ${{ inputs.codacy_token }}
       run: |
         if [ -n "$CODACY_PROJECT_TOKEN" ]; then
           echo "available=true" >> "$GITHUB_OUTPUT"
@@ -75,5 +75,5 @@ runs:
       if: ${{ steps.codacy-secret-check.outputs.available == 'true' && inputs.upload-coverage == 'true' }}
       shell: bash
       env:
-        CODACY_PROJECT_TOKEN: ${{ inputs.codacy-token }}
+        CODACY_PROJECT_TOKEN: ${{ inputs.codacy_token }}
       run: bash <(curl -Ls https://coverage.codacy.com/get.sh)

@@ -8,6 +8,7 @@ class GoWorkflowContractTest < Minitest::Test
     .github/workflows/go.yml
     .github/workflows/go-test.yml
   ].map { |path| File.join(ROOT, path) }
+  SHARED_WORKFLOW_INPUTS = %w[cache command go-version platform]
 
   def load_yaml(path)
     YAML.load_file(path)
@@ -34,10 +35,25 @@ class GoWorkflowContractTest < Minitest::Test
     action = load_yaml(ACTION_PATH)
     allowed_metadata = %w[description default required deprecationMessage]
 
+    assert_includes action.fetch('inputs').keys, 'codacy_token'
+
     action.fetch('inputs').each do |input_name, metadata|
       unsupported = metadata.keys - allowed_metadata
       assert_empty unsupported, "#{input_name} has unsupported metadata: #{unsupported.join(', ')}"
     end
+  end
+
+  def test_shared_go_workflow_inputs_have_matching_contracts
+    contracts = GO_WORKFLOW_PATHS.map do |path|
+      workflow = load_yaml(path)
+      inputs = workflow_on(workflow).fetch('workflow_call').fetch('inputs')
+
+      SHARED_WORKFLOW_INPUTS.each_with_object({}) do |input_name, contract|
+        contract[input_name] = inputs.fetch(input_name).slice('type', 'required', 'default')
+      end
+    end
+
+    assert_equal contracts.first, contracts.last
   end
 
   def test_go_workflows_delegate_to_action_with_declared_inputs
