@@ -1,0 +1,16 @@
+name: Validate Python packager
+description: Rejects Python packagers without a setup action in this repository
+
+inputs:
+  packager:
+    description: Python package manager to validate
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Validate packager
+      shell: bash
+      env:
+        PACKAGER: ${{ inputs.packager }}
+      run: bash "$GITHUB_ACTION_PATH/validate.sh"
