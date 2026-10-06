@@ -82,6 +82,13 @@ class GoWorkflowContractTest < Minitest::Test
       }
 
       passed_inputs.each do |input_name, value|
+        expected_value = if input_name == 'codacy_token'
+                           '${{ secrets.codacy_token }}'
+                         else
+                           "${{ inputs.#{input_name} }}"
+                         end
+        assert_equal expected_value, value, "#{path} maps #{input_name} to the wrong value"
+
         value.to_s.scan(/\$\{\{\s*(inputs|secrets)\.([\w-]+)\s*\}\}/).each do |context, name|
           assert_includes declared_context.fetch(context), name,
                           "#{path} #{input_name} references undeclared #{context}.#{name}"
