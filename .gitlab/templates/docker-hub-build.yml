@@ -1,15 +1,15 @@
 ## This pipeline template allows the build of a docker image and pushing it to Docker Hub
 
 ## Required variables:
-## DOCKER_IMAGE_NAME:        The Image name of the image that we're pushing
-
-## Optional variables:
 ## DOCKERHUB_REPO:        Repository for Dockerhub to push images to.
 ##                        Set at the Group Level
 ## DOCKERHUB_USERNAME:    Username for Dockerhub to authenticate with.
 ##                        Set at the Group Level
 ## DOCKERHUB_PASSWORD:    Password for Dockerhub to authenticate with.
 ##                        Set at the Group Level
+## DOCKER_IMAGE_NAME:     The Image name of the image that we're pushing
+
+## Optional variables:
 ## CACHE_TAG: The tag pulled before starting a build as a base to assist with faster builds using layers
 ## DOCKER_CACHE_TARGET: Space seperated list of stages in the Dockerfile to build and cache
 ## DOCKER_CONTEXT: Path of the docker context
