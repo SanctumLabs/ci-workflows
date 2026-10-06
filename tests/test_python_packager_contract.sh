@@ -36,8 +36,16 @@ for surface in "${surfaces[@]}"; do
     echo "Missing supported-packager documentation in $surface." >&2
     exit 1
   fi
-  if ! grep -Fq "uses: sanctumlabs/ci-workflows/.github/actions/validate-python-packager@main" "$repo_root/$surface"; then
+  validator_reference="uses: sanctumlabs/ci-workflows/.github/actions/validate-python-packager@main"
+  validator_line="$(grep -nF "$validator_reference" "$repo_root/$surface" | cut -d: -f1 || true)"
+  if [[ -z "$validator_line" ]]; then
     echo "Missing packager validation in $surface." >&2
+    exit 1
+  fi
+
+  setup_line="$(grep -nE 'uses: sanctumlabs/ci-workflows/.github/actions/(setup-python-\$\{\{ inputs\.packager \}\}|python-test)@main' "$repo_root/$surface" | head -n1 | cut -d: -f1 || true)"
+  if [[ -z "$setup_line" || "$validator_line" -ge "$setup_line" ]]; then
+    echo "Packager validation must precede setup in $surface." >&2
     exit 1
   fi
 done
