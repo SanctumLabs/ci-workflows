@@ -4,7 +4,10 @@ require 'yaml'
 class GoWorkflowContractTest < Minitest::Test
   ROOT = File.expand_path('..', __dir__)
   ACTION_PATH = File.join(ROOT, '.github/actions/go/action.yml')
-  GO_TEST_WORKFLOW_PATH = File.join(ROOT, '.github/workflows/go-test.yml')
+  GO_WORKFLOW_PATHS = %w[
+    .github/workflows/go.yml
+    .github/workflows/go-test.yml
+  ].map { |path| File.join(ROOT, path) }
 
   def load_yaml(path)
     YAML.load_file(path)
@@ -37,32 +40,36 @@ class GoWorkflowContractTest < Minitest::Test
     end
   end
 
-  def test_go_test_workflow_passes_declared_action_inputs
+  def test_go_workflows_delegate_to_action_with_declared_inputs
     action = load_yaml(ACTION_PATH)
-    workflow = load_yaml(GO_TEST_WORKFLOW_PATH)
-    action_steps = workflow.fetch('jobs').values.flat_map { |job| job.fetch('steps', []) }
-                            .select { |step| step['uses'].to_s.include?('/.github/actions/go@') }
-
-    assert_equal 1, action_steps.length, 'go-test.yml must invoke the Go composite action directly'
-
     action_inputs = action.fetch('inputs')
-    passed_inputs = action_steps.first.fetch('with')
-    unknown_inputs = passed_inputs.keys - action_inputs.keys
     required_inputs = action_inputs.select { |_name, metadata| metadata['required'] }.keys
 
-    assert_empty unknown_inputs, "workflow passes unknown action inputs: #{unknown_inputs.join(', ')}"
-    assert_empty(required_inputs - passed_inputs.keys, 'workflow omits required action inputs')
+    GO_WORKFLOW_PATHS.each do |path|
+      workflow = load_yaml(path)
+      steps = workflow.fetch('jobs').values.flat_map { |job| job.fetch('steps', []) }
+      action_steps = steps.select { |step| step['uses'].to_s.include?('/.github/actions/go@') }
 
-    call = workflow_on(workflow).fetch('workflow_call')
-    declared_context = {
-      'inputs' => call.fetch('inputs', {}).keys,
-      'secrets' => call.fetch('secrets', {}).keys
-    }
+      assert_equal 1, action_steps.length, "#{path} must invoke the Go composite action directly"
+      assert_empty steps.select { |step| step.key?('run') || step['uses'].to_s.start_with?('actions/setup-go@') },
+                   "#{path} duplicates Go setup or command execution"
 
-    passed_inputs.each do |input_name, value|
-      value.to_s.scan(/\$\{\{\s*(inputs|secrets)\.([\w-]+)\s*\}\}/).each do |context, name|
-        assert_includes declared_context.fetch(context), name,
-                        "#{input_name} references undeclared #{context}.#{name}"
+      passed_inputs = action_steps.first.fetch('with')
+      unknown_inputs = passed_inputs.keys - action_inputs.keys
+      assert_empty unknown_inputs, "#{path} passes unknown action inputs: #{unknown_inputs.join(', ')}"
+      assert_empty(required_inputs - passed_inputs.keys, "#{path} omits required action inputs")
+
+      workflow_call = workflow_on(workflow).fetch('workflow_call')
+      declared_context = {
+        'inputs' => workflow_call.fetch('inputs', {}).keys,
+        'secrets' => workflow_call.fetch('secrets', {}).keys
+      }
+
+      passed_inputs.each do |input_name, value|
+        value.to_s.scan(/\$\{\{\s*(inputs|secrets)\.([\w-]+)\s*\}\}/).each do |context, name|
+          assert_includes declared_context.fetch(context), name,
+                          "#{path} #{input_name} references undeclared #{context}.#{name}"
+        end
       end
     end
   end
