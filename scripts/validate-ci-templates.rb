@@ -22,7 +22,7 @@ def validate_workflow(path, document)
 end
 
 def validate_action_metadata(path, document)
-  return unless path.match?(%r{(?:^|/)\.github/actions/[^/]+/action\.yml\z})
+  return unless path.match?(%r{(?:^|/)\.github/actions/[^/]+/action\.ya?ml\z})
 
   runs = document["runs"]
   valid_runs = case runs.is_a?(Hash) ? runs["using"] : nil
@@ -44,7 +44,7 @@ def shell_commands(node, path, commands = [])
   when Hash
     node.each do |key, value|
       if SHELL_FIELDS.include?(key)
-        flatten_commands(value, path, commands)
+        commands << [path, flatten_commands(value, path).join("\n")]
       else
         shell_commands(value, path, commands)
       end
@@ -55,10 +55,10 @@ def shell_commands(node, path, commands = [])
   commands
 end
 
-def flatten_commands(value, path, commands)
+def flatten_commands(value, path, commands = [])
   case value
   when String
-    commands << [path, value]
+    commands << value
   when Array
     value.each { |item| flatten_commands(item, path, commands) }
   else
@@ -90,7 +90,7 @@ def default_files
   Dir.chdir(ROOT) do
     Dir.glob([
       ".github/workflows/**/*.{yml,yaml}",
-      ".github/actions/**/action.yml",
+      ".github/actions/**/action.{yml,yaml}",
       ".gitlab/templates/**/*.{yml,yaml}",
       "scripts/**/*.sh",
       "tests/fixtures/ci-validation/**/*.{yml,yaml}"

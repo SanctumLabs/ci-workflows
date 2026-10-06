@@ -47,13 +47,15 @@ class CIValidationTest < Minitest::Test
 
   def test_rejects_incomplete_composite_action_metadata
     Dir.mktmpdir do |directory|
-      path = File.join(directory, ".github/actions/sample/action.yml")
-      FileUtils.mkdir_p(File.dirname(path))
-      File.write(path, "name: Sample\ndescription: Example\nruns:\n  using: composite\n")
-      _stdout, stderr, status = run_validator(path)
+      %w[action.yml action.yaml].each do |metadata_file|
+        path = File.join(directory, ".github/actions/sample/#{metadata_file}")
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, "name: Sample\ndescription: Example\nruns:\n  using: composite\n")
+        _stdout, stderr, status = run_validator(path)
 
-      refute status.success?
-      assert_match(/action metadata must define/, stderr)
+        refute status.success?
+        assert_match(/action metadata must define/, stderr)
+      end
     end
   end
 
