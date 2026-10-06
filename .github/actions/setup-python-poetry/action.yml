@@ -5,7 +5,7 @@ inputs:
   python-version:
     description: Version of Python to use
     required: false
-    default: '3.10'
+    default: '3.12'
   poetry-version:
     description: Poetry Version
     required: false
@@ -19,7 +19,7 @@ runs:
     #---------------------------#
     - name: Set up python ${{ inputs.python-version }}
       id: setup-python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -28,7 +28,7 @@ runs:
     #----------------------------------------#
     - name: Load cached Poetry Binary
       id: cached-poetry-binary
-      uses: actions/cache@v3
+      uses: actions/cache@v6
       with:
         path: ~/.local
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ inputs.poetry-version }}
@@ -45,7 +45,7 @@ runs:
     #----------------------------------------------#
     - name: Load cached venv
       id: cached-poetry-dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v6
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}

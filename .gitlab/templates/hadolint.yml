@@ -3,7 +3,7 @@
 ## Requires a test stage.
 
 hadolint:
-  image: hadolint/hadolint
+  image: hadolint/hadolint:v2.15.1
   variables:
     DOCKERFILES: "./Dockerfile" # A space seperated list of all Dockerfiles to test
     IGNORED_RULES: "DL3008"     # A space seperated list of rules to ignore. To run all rules, use ""

@@ -28,7 +28,7 @@ jobs:
       # https://github.com/docker/build-push-action/blob/v2.5.0/docs/advanced/tags-labels.md
       - name: Docker Meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v6
         with:
           # list of Docker images to use as base name for tags
           images: |

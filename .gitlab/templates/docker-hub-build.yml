@@ -19,7 +19,7 @@
 ## DOCKER_IMAGE_TAG: Space seperated list of tags to push after building
 
 .docker-hub-build:
-  image: docker:latest
+  image: docker:29-cli
   variables:
     CACHE_TAG: ${CI_DEFAULT_BRANCH}
     DOCKER_CACHE_TARGET: ""
@@ -33,6 +33,6 @@
     DOCKER_IMAGE_NAME: ""
     DOCKER_IMAGE_TAG: ${CI_COMMIT_SHA} ${CI_COMMIT_REF_NAME}    
   services:
-    - docker:dind
+    - docker:29-dind
   script:
   - ../scripts/docker-build.sh

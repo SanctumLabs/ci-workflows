@@ -1,7 +1,7 @@
 ## Publish PyPI Python package which defaults to publishing to Gitlab Package registry
 
 .publish-pypi:
-    image: python:3.10.4
+    image: python:3.12-bookworm
     variables:
         TWINE_PASSWORD: ${CI_JOB_TOKEN}
         TWINE_USERNAME: gitlab-ci-token

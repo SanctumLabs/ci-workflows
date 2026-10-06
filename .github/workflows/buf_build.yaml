@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Buf Setup
         uses: bufbuild/buf-setup-action@v1
@@ -23,7 +23,7 @@ jobs:
         run: buf generate
       
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: lib
           path: |

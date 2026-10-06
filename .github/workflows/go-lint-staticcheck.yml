@@ -10,7 +10,7 @@ on:
           required: false
         go-version:
           description: Go Version to use
-          default: '1.20'
+          default: '1.26'
           type: string
           required: false
         cache:
@@ -34,16 +34,16 @@ jobs:
     runs-on: ${{ inputs.platform }}
     steps:
         - name: Checkout
-          uses: actions/checkout@v4
+          uses: actions/checkout@v7
 
         - name: Install Go
-          uses: actions/setup-go@v5
+          uses: actions/setup-go@v7
           with:
             go-version: ${{ inputs.go-version }}
             cache: ${{ inputs.cache }}
 
         - name: static check
-          uses: dominikh/staticcheck-action@v1.2.0
+          uses: dominikh/staticcheck-action@v1.4.1
           with:
             version: ${{ inputs.version }}
             install-go: false

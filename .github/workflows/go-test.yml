@@ -17,7 +17,7 @@
 #      name: Lint
 #      uses: SanctumLabs/ci-workflows/.github/workflows/go-test.yml@main
 #      with:
-#        go-version: 1.25 # Go version to use
+#        go-version: 1.26 # Go version to use
 #        command: make test.integration # command to run tests
 
 name: Reuseable Go Test workflow
@@ -32,7 +32,7 @@ on:
           required: false
         go-version:
           description: Go Version to use
-          default: '1.25'
+          default: '1.26'
           type: string
           required: false
         cache:

@@ -14,7 +14,7 @@ inputs:
   golang-migrate-version:
     description: golang-migrate version
     required: false
-    default: 4.17.0
+    default: 4.20.1
 
 outputs:
   migration_report:

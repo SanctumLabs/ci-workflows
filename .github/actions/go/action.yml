@@ -9,7 +9,7 @@ inputs:
 
   go-version:
     description: Go Version to use
-    default: '1.25'
+    default: '1.26'
     type: string
     required: false
   
@@ -50,7 +50,7 @@ runs:
 
     - name: Upload Test coverage reports
       if: ${{ inputs.upload-coverage }}
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v7
 
     - name: Check for Codacy Token Secret availability
       if: ${{ inputs.upload-coverage }}

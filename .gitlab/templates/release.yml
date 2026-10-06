@@ -12,7 +12,7 @@
 
 create-tag:
   stage: publish
-  image: node:18
+  image: node:24-bookworm
   variables:
     GITLAB_TOKEN: ${GITLAB_ACCESS_TOKEN}
   before_script:

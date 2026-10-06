@@ -15,7 +15,7 @@ on:
         type: string
       python-version:
         description: Python Version to use
-        default: "3.10"
+        default: "3.12"
         required: false
         type: string
       install-command:
@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Ref: https://github.com/jenseng/dynamic-uses
       - name: Setup

@@ -8,6 +8,9 @@ These templates can be included in other pipelines.They are "functions" for thin
 
 To use them first include the template
 
+For current third-party action, tool, and container image versions and the
+version update policy, see [DEPENDENCY_VERSIONS.md](DEPENDENCY_VERSIONS.md).
+
 ``` yaml
 include:
   - project: 'sanctumlabs/tools/gitlab-ci'
