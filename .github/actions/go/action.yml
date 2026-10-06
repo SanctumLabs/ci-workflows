@@ -1,85 +1,79 @@
-name: 'Re-useable Go Action'
-description: 'Github Action for running a Go workflow'
+name: 'Reusable Go Action'
+description: 'Set up Go and run a command'
 
 inputs:
   command:
-    description: Command to run for running tests
-    type: string
+    description: Command to run
     required: true
 
   go-version:
-    description: Go Version to use
+    description: Go version to use
     default: '1.25'
-    type: string
     required: false
-  
+
+  cache:
+    description: Whether to cache dependencies
+    default: 'true'
+    required: false
+
   upload-coverage:
     description: Whether to upload coverage reports
     default: 'false'
     required: false
 
-  codacy_token:
-    description: 'Codacy Project token for uploading coverage to Codacy'
-    required: false
-
-  platform:
-    description: Platform to run on
-    default: 'ubuntu-latest'
-    type: string
-    required: false
-
-  cache:
-    description: whether to cache dependencies
-    default: true
-    type: boolean
+  codacy-token:
+    description: Codacy project token for uploading coverage
     required: false
 
 runs:
   using: 'composite'
-
   steps:
     - name: Checkout
       uses: actions/checkout@v7
 
-    # Ref: https://github.com/jenseng/dynamic-uses
-    - name: Setup 
-      uses: jenseng/dynamic-uses@v1
+    - name: Set up Go
+      uses: actions/setup-go@v7
       with:
-        uses: SanctumLabs/ci-workflows/.github/workflows/go.yml@main
-        with: '{ "platform-version": "${{ inputs.platform }}", "command": "${{ inputs.command }}", "cache": "${{ inputs.cache }}", "go-version": "${{ inputs.go-version }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'          
+        go-version: ${{ inputs.go-version }}
+        cache: ${{ inputs.cache }}
 
-    - name: Upload Test coverage reports
-      if: ${{ inputs.upload-coverage }}
+    - name: Run command
+      shell: bash
+      run: ${{ inputs.command }}
+
+    - name: Upload test coverage reports
+      if: ${{ inputs.upload-coverage == 'true' }}
       uses: codecov/codecov-action@v3
 
-    - name: Check for Codacy Token Secret availability
-      if: ${{ inputs.upload-coverage }}
+    - name: Check for Codacy token
+      if: ${{ inputs.upload-coverage == 'true' }}
       id: codacy-secret-check
-      # perform secret check & put boolean result as an output
       shell: bash
+      env:
+        CODACY_PROJECT_TOKEN: ${{ inputs.codacy-token }}
       run: |
-        if [ "${{ inputs.codacy_token }}" != '' ]; then
-          echo "available=true" >> $GITHUB_OUTPUT;
+        if [ -n "$CODACY_PROJECT_TOKEN" ]; then
+          echo "available=true" >> "$GITHUB_OUTPUT"
         else
-          echo "available=false" >> $GITHUB_OUTPUT;
+          echo "available=false" >> "$GITHUB_OUTPUT"
         fi
 
-    - name: Check Inadequate Permissions
-      if: ${{ steps.codacy-secret-check.outputs.available != 'true' && inputs.upload-coverage }}
-      # provide feedback for likely problem, note dependabot cannot access
-      # secrets by default. Secondly, this step forces job to exit with a code of 0. This secret may be missing intentionally
+    - name: Check inadequate permissions
+      if: ${{ steps.codacy-secret-check.outputs.available != 'true' && inputs.upload-coverage == 'true' }}
       shell: bash
+      env:
+        ACTOR: ${{ github.actor }}
       run: |
-        if [ "${{ github.actor }}" == "dependabot[bot]" ]; then
-          echo >&2 "Unable to access secrets as unprivileged dependabot.";
+        if [ "$ACTOR" = "dependabot[bot]" ]; then
+          echo >&2 "Unable to access secrets as unprivileged dependabot."
         else
-          echo >&2 "Inadequate Permissions or missing secret value";
+          echo >&2 "Inadequate permissions or missing secret value."
         fi
         exit 0
-        
-    - name: Run codacy-coverage-reporter
+
+    - name: Run Codacy coverage reporter
+      if: ${{ steps.codacy-secret-check.outputs.available == 'true' && inputs.upload-coverage == 'true' }}
       shell: bash
-      if: ${{ steps.codacy-secret-check.outputs.available == 'true' && inputs.upload-coverage }}
       env:
-        CODACY_PROJECT_TOKEN: ${{ inputs.codacy_token }}
+        CODACY_PROJECT_TOKEN: ${{ inputs.codacy-token }}
       run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
