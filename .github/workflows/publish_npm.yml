@@ -61,7 +61,7 @@ jobs:
       - name: Publish from ${{ inputs.directory }}
         env:
           NPM_TOKEN: ${{ secrets.npmAuthToken }}
-        if: ${{ steps.directory-check.ouputs.changeDir == 'true' }}
+        if: ${{ steps.directory-check.outputs.changeDir == 'true' }}
         run: |
           cd ${{ inputs.directory }}
           npm ci
@@ -71,7 +71,7 @@ jobs:
       - name: Publish from root directory
         env:
           NPM_TOKEN: ${{ secrets.npmAuthToken }}
-        if: ${{ steps.directory-check.ouputs.changeDir != 'true' }}
+        if: ${{ steps.directory-check.outputs.changeDir != 'true' }}
         run: |
           npm ci
           npm version ${{ inputs.version }}

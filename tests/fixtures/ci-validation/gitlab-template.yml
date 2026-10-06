@@ -1,0 +1,7 @@
+.sample-check:
+  script:
+    - printf '%s\n' "${CI_COMMIT_SHA}"
+    - |
+      if [ -n "${CI_COMMIT_SHA}" ]; then
+        echo "${CI_COMMIT_SHA}"
+      fi
