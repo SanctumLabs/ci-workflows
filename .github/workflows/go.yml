@@ -50,14 +50,9 @@ jobs:
   runner:
     runs-on: ${{ inputs.platform }}
     steps:
-        - name: Checkout
-          uses: actions/checkout@v7
-
-        - name: Install Go
-          uses: actions/setup-go@v7
-          with:
-            go-version: ${{ inputs.go-version }}
-            cache: ${{ inputs.cache }}
-
-        - name: Running command ${{ inputs.command }}
-          run: ${{ inputs.command}}
+      - name: Run Go command
+        uses: SanctumLabs/ci-workflows/.github/actions/go@main
+        with:
+          command: ${{ inputs.command }}
+          go-version: ${{ inputs.go-version }}
+          cache: ${{ inputs.cache }}
