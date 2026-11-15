@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+printf '%s' "$1" >> "${DOCKER_STUB_LOG:?}"
+shift
+for argument in "$@"; do
+  printf ' <%s>' "$argument" >> "${DOCKER_STUB_LOG}"
+done
+printf '\n' >> "${DOCKER_STUB_LOG}"

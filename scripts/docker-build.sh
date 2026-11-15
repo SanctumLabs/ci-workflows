@@ -3,10 +3,10 @@
 set -e
 
 ## REQUIRED VARIABLES
-## DOCKERHUB_PASSWORD: Password for Dockerhub to authenticate with
-## DOCKERHUB_USERNAME: Username for Dockerhub to authenticate with
-## DOCKERHUB_REPO: The name of the Org to push/pull to/from
-## DOCKERHUB_IMAGE_NAME: The name of the image
+## DOCKERHUB_PASSWORD: Password for Docker Hub to authenticate with
+## DOCKERHUB_USERNAME: Username for Docker Hub to authenticate with
+## DOCKERHUB_REPO: Repository namespace to push/pull to/from
+## DOCKER_IMAGE_NAME: The name of the image
 DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:?}"
 DOCKERHUB_PASSWORD="${DOCKERHUB_PASSWORD:?}"
 DOCKERHUB_REPO="${DOCKERHUB_REPO:?}"
@@ -37,12 +37,12 @@ dockerhub_login() {
 dockerhub_login
 
 # Build and push all cache targets
-CACHE_FROM_ARGS="--cache-from ${ECR_IMAGE_REPO}:${CACHE_TAG}"
+CACHE_FROM_ARGS="--cache-from ${DOCKERHUB_REPO}/${DOCKER_IMAGE_NAME}:${CACHE_TAG}"
 for CACHE_TARGET in ${DOCKER_CACHE_TARGET}; do
   IMAGE="${DOCKERHUB_REPO}/${DOCKER_IMAGE_NAME}:${CACHE_TARGET}"
   CACHE_FROM_ARGS="${CACHE_FROM_ARGS} --cache-from ${IMAGE}"
 
-  docker pull "${ECR_IMAGE_REPO}:${CACHE_TARGET}" || true
+  docker pull "${IMAGE}" || true
 
   # Need to disable word splitting check for flags to docker build
   # shellcheck disable=SC2086
@@ -60,7 +60,7 @@ docker build ${CACHE_FROM_ARGS} ${DOCKER_EXTRA_BUILD_ARGS} -t gitlabimagebuild -
 docker tag gitlabimagebuild "${DOCKERHUB_REPO}/${DOCKER_IMAGE_NAME}:${CACHE_TAG}"
 docker push "${DOCKERHUB_REPO}/${DOCKER_IMAGE_NAME}:${CACHE_TAG}"
 
-# Tag and push each tag in ECR_IMAGE_TAG
+# Tag and push each tag in DOCKER_IMAGE_TAG
 for TAG in ${DOCKER_IMAGE_TAG}; do
   # Limit tag length to 100 characters and replace / with -
   TAG=$(echo "${TAG}" | awk '{print substr($0,1,100)}' | sed 's,/,-,g')

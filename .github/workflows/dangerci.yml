@@ -33,7 +33,7 @@ jobs:
 
       - name: Get yarn cache directory path
         id: cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
+        run: echo "dir=$(yarn cache dir)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache # use this to check for `cache-hit` (`steps.cache.outputs.cache-hit != 'true'`)

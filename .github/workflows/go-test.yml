@@ -120,6 +120,9 @@ on:
       codacy_token:
         description: "Codacy Project token for uploading coverage to Codacy"
         required: false
+      codecov_token:
+        description: "Codecov repository token for uploading coverage"
+        required: false
  
 jobs:
   test:
@@ -156,8 +159,11 @@ jobs:
 
     steps:
       - name: Run tests
-        # Ref: https://github.com/jenseng/dynamic-uses
-        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1.1.1
+        uses: SanctumLabs/ci-workflows/.github/actions/go@main
         with:
-          uses: sanctumlabs/ci-workflows/.github/actions/go@main
-          with: '{ "platform-version": "${{ inputs.platform }}", "command": "${{ inputs.command }}", "cache": "${{ inputs.cache }}", "go-version": "${{ inputs.go-version }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'          
+          command: ${{ inputs.command }}
+          go-version: ${{ inputs.go-version }}
+          cache: ${{ inputs.cache }}
+          upload-coverage: ${{ inputs.upload-coverage }}
+          codacy_token: ${{ secrets.codacy_token }}
+          codecov_token: ${{ secrets.codecov_token }}
