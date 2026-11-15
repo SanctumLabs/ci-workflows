@@ -7,7 +7,7 @@
         TWINE_USERNAME: gitlab-ci-token
         REPOSITORY_URL: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi
         DIRECTORY: ./dist/*
-      before_script:
+    before_script:
         - pip install twine
     script:
         - TWINE_PASSWORD=${TWINE_PASSWORD} TWINE_USERNAME=${TWINW_PASSWORD} twine upload --repository-url ${REPOSITORY_URL} --verbose -u '__token__' ${DIRECTORY}

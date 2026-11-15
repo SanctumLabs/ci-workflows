@@ -1,0 +1,41 @@
+name: Validate CI templates
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: "1.25"
+
+      - name: Validate GitHub Actions workflows
+        # Keep unrelated action-version upgrades in issue #7.
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
+            -ignore 'the runner of "actions/upload-artifact@v3" action is too old to run on GitHub Actions' \
+            -ignore 'the runner of "docker/metadata-action@v4" action is too old to run on GitHub Actions' \
+            -ignore 'the runner of "docker/metadata-action@v3" action is too old to run on GitHub Actions' \
+            -ignore 'the runner of "codecov/codecov-action@v3" action is too old to run on GitHub Actions' \
+            -ignore 'the runner of "softprops/action-gh-release@v1" action is too old to run on GitHub Actions' \
+            .github/workflows/*.yaml .github/workflows/*.yml \
+            tests/fixtures/ci-validation/go-workflow-consumer.yml
+        shell: bash
+
+      - name: Validate workflow and GitLab metadata
+        run: ruby scripts/validate-ci-templates.rb
+        shell: bash
+
+      - name: Test the CI validator
+        run: ruby tests/ci_validation_test.rb
+        shell: bash
