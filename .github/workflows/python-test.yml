@@ -66,11 +66,13 @@ jobs:
         id: codacy-secret-check
         # perform secret check & put boolean result as an output
         shell: bash
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.codacy_token }}
         run: |
-          if [ "${{ secrets.codacy_token }}" != '' ]; then
-            echo "available=true" >> $GITHUB_OUTPUT;
+          if [ -n "$CODACY_PROJECT_TOKEN" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
           else
-            echo "available=false" >> $GITHUB_OUTPUT;
+            echo "available=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check Inadequate Permissions
@@ -78,8 +80,10 @@ jobs:
         # provide feedback for likely problem, note dependabot cannot access
         # secrets by default. Secondly, this step forces job to exit with a code of 0. This secret may be missing intentionally
         shell: bash
+        env:
+          ACTOR: ${{ github.actor }}
         run: |
-          if [ "${{ github.actor }}" == "dependabot[bot]" ]; then
+          if [ "$ACTOR" = "dependabot[bot]" ]; then
             echo >&2 "Unable to access secrets as unprivileged dependabot.";
           else
             echo >&2 "Inadequate Permissions or missing secret value";
