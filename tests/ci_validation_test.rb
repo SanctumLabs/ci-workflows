@@ -54,8 +54,25 @@ class CIValidationTest < Minitest::Test
       defined_inputs = workflow_call.fetch("workflow_call").fetch("inputs")
       caller_inputs = consumer.fetch("jobs").values.first.fetch("with", {})
 
-      caller_inputs.each_key do |name|
+      caller_inputs.each do |name, value|
         assert_includes defined_inputs, name, "#{fixture} passes undefined input #{name}"
+
+        input_type = defined_inputs.fetch(name).fetch("type")
+        case input_type
+        when "string"
+          assert_kind_of String, value, "#{fixture} passes a non-string value for #{name}"
+        when "boolean"
+          assert_includes [true, false], value, "#{fixture} passes a non-boolean value for #{name}"
+        when "number"
+          assert_kind_of Numeric, value, "#{fixture} passes a non-numeric value for #{name}"
+        end
+
+        case name
+        when "java-version"
+          assert_includes %w[17 21 25], value, "#{fixture} uses an unsupported JDK version"
+        when "build-tool"
+          assert_includes %w[gradle maven], value, "#{fixture} uses an unsupported Java build tool"
+        end
       end
     end
   end

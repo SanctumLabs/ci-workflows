@@ -43,7 +43,16 @@ jobs:
         shell: bash
         env:
           BUILD_TOOL: ${{ inputs.build-tool }}
+          JAVA_VERSION: ${{ inputs.java-version }}
         run: |
+          case "$JAVA_VERSION" in
+            17|21|25) ;;
+            *)
+              echo "Unsupported Temurin JDK major version: $JAVA_VERSION (expected 17, 21, or 25)." >&2
+              exit 1
+              ;;
+          esac
+
           case "$BUILD_TOOL" in
             gradle|maven) ;;
             *)

@@ -34,6 +34,19 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Validate JDK version
+        shell: bash
+        env:
+          JAVA_VERSION: ${{ inputs.java-version }}
+        run: |
+          case "$JAVA_VERSION" in
+            17|21|25) ;;
+            *)
+              echo "Unsupported Temurin JDK major version: $JAVA_VERSION (expected 17, 21, or 25)." >&2
+              exit 1
+              ;;
+          esac
+
       - name: Set up JDK and Gradle dependency cache
         uses: actions/setup-java@v4
         with:
