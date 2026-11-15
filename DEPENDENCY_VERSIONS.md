@@ -3,7 +3,7 @@
 This inventory covers third-party GitHub Actions, versions of tools installed or
 run by this repository's templates, and container images referenced by GitHub
 and GitLab CI. It was checked against upstream release notes and registries on
-2026-10-06. Update this file whenever one of these references changes.
+2026-11-15. Update this file whenever one of these references changes.
 
 ## Update policy
 
@@ -38,13 +38,13 @@ an update-maintenance choice, not immutable pins.
 | --- | --- | --- |
 | `actions/checkout@v7` | Reusable workflows and the Go/Python test composite actions | [v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1) |
 | `actions/setup-go@v7` | Go build, lint, and staticcheck workflows | [v7.0.0](https://github.com/actions/setup-go/releases/tag/v7.0.0) |
-| `actions/setup-node@v7` | Danger, npm publish, and semantic-release workflows | [v7.0.0](https://github.com/actions/setup-node/releases/tag/v7.0.0) |
-| `actions/setup-python@v7` | Poetry and uv composite setup actions | [v7.0.0](https://github.com/actions/setup-python/releases/tag/v7.0.0) |
+| `actions/setup-node@v7` | Danger, npm publish, and semantic-release workflows | [v7.1.0](https://github.com/actions/setup-node/releases/tag/v7.1.0) |
+| `actions/setup-python@v7` | Poetry and uv composite setup actions | [v7.1.0](https://github.com/actions/setup-python/releases/tag/v7.1.0) |
 | `actions/cache@v6` | Python setup, Rust, Docker, and Danger workflows | [v6.1.0](https://github.com/actions/cache/releases/tag/v6.1.0) |
-| `actions/upload-artifact@v7` | Buf and Bun build workflows | [v7.0.1](https://github.com/actions/upload-artifact/releases/tag/v7.0.1) |
+| `actions/upload-artifact@v7` | Buf and Bun build workflows | [v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2) |
 | `codecov/codecov-action@v7` | Go/Python coverage composite actions and Python test workflow | [v7.1.1](https://github.com/codecov/codecov-action/releases/tag/v7.1.1) |
 | `jenseng/dynamic-uses@v1` | Workflows and composite actions that select a setup action dynamically | [v1.1.1](https://github.com/jenseng/dynamic-uses/releases/tag/v1.1.1) |
-| `astral-sh/setup-uv@v10` | uv composite setup action | [v10.2.0](https://github.com/astral-sh/setup-uv/releases/tag/v10.2.0) |
+| `astral-sh/setup-uv@v10` | uv composite setup action | [v10.3.3](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.3) |
 | `snok/install-poetry@v1` | Poetry composite setup action | [v1.4.2](https://github.com/snok/install-poetry/releases/tag/v1.4.2) |
 | `oven-sh/setup-bun@v2` | Bun build workflow | [v2.2.0](https://github.com/oven-sh/setup-bun/releases/tag/v2.2.0) |
 | `astral-sh/ruff-action@v4.1.0` | Ruff lint workflow | [v4.1.0](https://github.com/astral-sh/ruff-action/releases/tag/v4.1.0) |
@@ -55,12 +55,14 @@ an update-maintenance choice, not immutable pins.
 | `softprops/action-gh-release@v3` | GitHub release workflow | [v3.0.3](https://github.com/softprops/action-gh-release/releases/tag/v3.0.3) |
 | `rtCamp/action-slack-notify@v2` | Slack notification workflow | [v2.4.0](https://github.com/rtCamp/action-slack-notify/releases/tag/v2.4.0) |
 | `actions-rust-lang/rustfmt@v1` | Rust lint workflow | [v1.1.2](https://github.com/actions-rust-lang/rustfmt/releases/tag/v1.1.2) |
-| `actions-rust-lang/setup-rust-toolchain@v1` | Rust lint workflow | [v1.17.0](https://github.com/actions-rust-lang/setup-rust-toolchain/releases/tag/v1.17.0) |
+| `actions-rust-lang/setup-rust-toolchain@v1` | Rust lint workflow | [v2.0.1](https://github.com/actions-rust-lang/setup-rust-toolchain/releases/tag/v2.0.1) is latest; the workflow deliberately retains v1 |
 | `danger/danger-js@9.1.8` | Danger workflow; exact tool-version pin | [npm version](https://www.npmjs.com/package/danger/v/9.1.8) |
 | `wangchucheng/git-repo-sync@v0.1.0` | Repository sync workflow | [Latest upstream release](https://github.com/wangchucheng/git-repo-sync/releases/tag/v0.1.0) |
 
-The newer `setup-rust-toolchain` v2 release changes warning behavior, so the
-workflow remains on its v1 line until that behavior can be evaluated separately.
+The newer `setup-rust-toolchain` v2 release changes how compiler warnings are
+enforced (using Cargo's `build.warnings` configuration rather than the previous
+default `RUSTFLAGS`), so the workflow remains on its v1 line until that behavior
+can be evaluated separately.
 The repo-sync action has no later upstream release; do not invent a replacement
 version without evaluating a migration. Danger remains on 9.1.8 because the
 upstream package is now 14.x and that major jump needs a separate compatibility
@@ -74,23 +76,44 @@ removed `pip-install` input is not used by these workflows.
 | Go | `1.26` | Go reusable workflows and Go composite action | [Go release policy](https://go.dev/doc/devel/release#policy), [releases](https://go.dev/dl/) |
 | Python | `3.12` | General Python workflows and Poetry setup; the uv setup action also defaults to `3.12` | [Python version status](https://devguide.python.org/versions/) |
 | Python for Ruff | `3.14` | Ruff lint workflow | [Python version status](https://devguide.python.org/versions/) |
-| Node.js | `24.x` | Danger and npm-publish workflows | [Node.js release schedule](https://github.com/nodejs/Release) |
+| Node.js | `24.x` | Danger and npm-publish workflows; supported maintenance LTS line | [Node.js release schedule](https://github.com/nodejs/Release) |
 | Node.js for semantic-release | `lts/*` | semantic-release workflow; intentionally follows the current LTS line | [Node.js release schedule](https://github.com/nodejs/Release) |
 | Bun | `1.4.2` | Bun build workflow | [Bun v1.4.2](https://github.com/oven-sh/bun/releases/tag/bun-v1.4.2) |
-| Ruff | `0.16.3` | Ruff workflow input default | [Ruff releases](https://github.com/astral-sh/ruff/releases) |
+| Ruff | `0.17.5` | Ruff workflow input default | [Ruff v0.17.5](https://github.com/astral-sh/ruff/releases/tag/0.17.5) |
+| Buf CLI | `1.50.0` | Default `version` input from `buf-setup-action@v1`; callers may override it | [buf-setup-action metadata](https://github.com/bufbuild/buf-setup-action/blob/v1/action.yml) |
+| golangci-lint | `latest` unless the consumer's `go.mod` supplies a version | Go lint workflow; action input is not set | [golangci-lint releases](https://github.com/golangci/golangci-lint/releases) |
 | uv | `latest` | uv composite action input default; callers can provide an exact version | [uv releases](https://github.com/astral-sh/uv/releases) |
 | Poetry | `latest` | Poetry composite action input default; callers can provide an exact version | [Poetry releases](https://github.com/python-poetry/poetry/releases) |
 | Staticcheck | `latest` | Staticcheck workflow input default | [Staticcheck releases](https://github.com/dominikh/staticcheck/releases) |
-| Rust toolchain | `stable` | Rust build/lint workflows | [Rust release channels](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html) |
+| Rust toolchain | `stable` | Rust build/lint workflows | [Rustup release channels](https://rust-lang.github.io/rustup/concepts/channels.html) |
 | golang-migrate | `4.20.1` | Database migration composite action | [v4.20.1](https://github.com/golang-migrate/migrate/releases/tag/v4.20.1) |
 | Danger JS | `9.1.8` | Danger workflow | [npm package](https://www.npmjs.com/package/danger) |
 
-The Go default uses the supported 1.26 line rather than the newly released 1.27
-line to allow downstream Go tooling to catch up. The Python and Node defaults
+The Go default uses the supported 1.26 line rather than the newer 1.27 line
+to allow downstream Go tooling to catch up. The Python and Node defaults
 move away from older runtime lines, while remaining caller-overridable. The Go
 test workflow's optional database and cache service images are caller-selected;
 their image version inputs still default to `latest`, so callers should set an
 explicit compatible version when reproducibility matters.
+
+## Internal reusable references
+
+These are references to this repository rather than third-party actions. The
+existing `@main` references are retained so repository workflows and dynamic
+composite-action selection continue to follow the checked-out default branch;
+the release action's workflow is similarly coupled to the repository's main
+branch. For consumers that need a stable workflow definition, use a published
+release tag or a full commit SHA in the consumer's `uses:` reference. Do not
+silently replace these with a version until the repository's consumer-facing
+release-tag policy is established.
+
+| Internal reference | Where used |
+| --- | --- |
+| `SanctumLabs/ci-workflows/.github/workflows/go.yml@main` | Go composite action; commented consumer examples also show the workflow |
+| `SanctumLabs/ci-workflows/.github/actions/go@main` | Go test workflow |
+| `SanctumLabs/ci-workflows/.github/actions/python-test@main` | Python/PostgreSQL test workflow |
+| `SanctumLabs/ci-workflows/.github/workflows/release-semantic.yml@main` | Internal release action |
+| Python packager action paths at `@main` | Python build, lint, test, and publish workflows select `setup-python-${{ inputs.packager }}` dynamically |
 
 ### Unpinned installations
 

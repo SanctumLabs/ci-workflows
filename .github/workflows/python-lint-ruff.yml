@@ -41,7 +41,7 @@ on:
         type: string
       ruff-version:
         description: Ruff version to use
-        default: "0.16.3"
+        default: "0.17.5"
         required: false
         type: string
       directory:
