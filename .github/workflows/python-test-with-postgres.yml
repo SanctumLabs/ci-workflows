@@ -85,11 +85,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run tests
         # Ref: https://github.com/jenseng/dynamic-uses
-        uses: jenseng/dynamic-uses@v1
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1.1.1
         with:
           uses: sanctumlabs/ci-workflows/.github/actions/python-test@main
           with: '{ "python-version": "${{ inputs.python-version }}", "command": "${{ inputs.command }}", "packager": "${{ inputs.packager }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'

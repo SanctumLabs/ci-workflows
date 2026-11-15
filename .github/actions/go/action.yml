@@ -39,18 +39,18 @@ runs:
 
   steps:
     - name: Checkout
-      uses: actions/checkout@v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     # Ref: https://github.com/jenseng/dynamic-uses
     - name: Setup 
-      uses: jenseng/dynamic-uses@v1
+      uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1.1.1
       with:
         uses: SanctumLabs/ci-workflows/.github/workflows/go.yml@main
         with: '{ "platform-version": "${{ inputs.platform }}", "command": "${{ inputs.command }}", "cache": "${{ inputs.cache }}", "go-version": "${{ inputs.go-version }}", "codacy_token": "${{ secrets.codacy_token }}", "upload-coverage": "${{ inputs.upload-coverage }}" }'          
 
     - name: Upload Test coverage reports
       if: ${{ inputs.upload-coverage }}
-      uses: codecov/codecov-action@v7
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
 
     - name: Check for Codacy Token Secret availability
       if: ${{ inputs.upload-coverage }}

@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     name: Repo Sync
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Mirror to Repository
-        uses: wangchucheng/git-repo-sync@v0.1.0
+        uses: wangchucheng/git-repo-sync@63782025e80e84c48b25a1ee6bb9a22a3bd570d3 # v0.1.0
         with:
           target-url: ${{ secrets.url }}
           target-username: ${{ secrets.username }}

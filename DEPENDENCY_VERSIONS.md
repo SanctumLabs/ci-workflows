@@ -7,11 +7,10 @@ and GitLab CI. It was checked against upstream release notes and registries on
 
 ## Update policy
 
-- Prefer the latest stable compatible major of third-party Actions, referenced
-  by its major tag (for example, `actions/checkout@v7`). Review upstream release
-  notes before crossing a major; do not assume that a major upgrade preserves
-  inputs or behavior. Use a full commit SHA instead when immutable action code
-  is required, and include the corresponding release version in a comment.
+- Pin third-party Actions to a full commit SHA and include the corresponding
+  upstream release version in a trailing comment. Select the latest stable
+  compatible release and review its notes before crossing a major; do not assume
+  that a major upgrade preserves inputs or behavior.
 - Keep tool versions configurable through workflow/action inputs. Default to a
   supported, broadly compatible release line; reserve floating values such as
   `latest`, `stable`, or `lts/*` for defaults where automatic updates are
@@ -28,41 +27,44 @@ and GitLab CI. It was checked against upstream release notes and registries on
   should verify that their runner supports the selected Action runtime and that
   their project supports the configured language/tool default.
 
-Action tags below intentionally use major-version references except where the
-repository currently has a version-specific pin. Major tags can move; they are
-an update-maintenance choice, not immutable pins.
+Third-party GitHub Actions are pinned to the full commit SHA for the verified
+upstream release. Each `uses:` line includes a release-version comment for
+reviewability; the SHA, not the comment or a moving tag, determines the code
+that runs. To update one, verify compatibility against the upstream release,
+resolve its tag to the commit SHA, change both the workflow reference and this
+inventory, and retain the release comment.
 
 ## Third-party GitHub Actions
 
-| Reference in this repository | Where used | Upstream release checked |
+| Pinned reference (upstream release) | Where used | Upstream release |
 | --- | --- | --- |
-| `actions/checkout@v7` | Reusable workflows and the Go/Python test composite actions | [v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1) |
-| `actions/setup-go@v7` | Go build, lint, and staticcheck workflows | [v7.0.0](https://github.com/actions/setup-go/releases/tag/v7.0.0) |
-| `actions/setup-node@v7` | Danger, npm publish, and semantic-release workflows | [v7.1.0](https://github.com/actions/setup-node/releases/tag/v7.1.0) |
-| `actions/setup-python@v7` | Poetry and uv composite setup actions | [v7.1.0](https://github.com/actions/setup-python/releases/tag/v7.1.0) |
-| `actions/cache@v6` | Python setup, Rust, Docker, and Danger workflows | [v6.1.0](https://github.com/actions/cache/releases/tag/v6.1.0) |
-| `actions/upload-artifact@v7` | Buf and Bun build workflows | [v7.0.2](https://github.com/actions/upload-artifact/releases/tag/v7.0.2) |
-| `codecov/codecov-action@v7` | Go/Python coverage composite actions and Python test workflow | [v7.1.1](https://github.com/codecov/codecov-action/releases/tag/v7.1.1) |
-| `jenseng/dynamic-uses@v1` | Workflows and composite actions that select a setup action dynamically | [v1.1.1](https://github.com/jenseng/dynamic-uses/releases/tag/v1.1.1) |
-| `astral-sh/setup-uv@v10` | uv composite setup action | [v10.3.3](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.3) |
-| `snok/install-poetry@v1` | Poetry composite setup action | [v1.4.2](https://github.com/snok/install-poetry/releases/tag/v1.4.2) |
-| `oven-sh/setup-bun@v2` | Bun build workflow | [v2.2.0](https://github.com/oven-sh/setup-bun/releases/tag/v2.2.0) |
-| `astral-sh/ruff-action@v4.1.0` | Ruff lint workflow | [v4.1.0](https://github.com/astral-sh/ruff-action/releases/tag/v4.1.0) |
-| `golangci/golangci-lint-action@v9.3.0` | Go lint workflow | [v9.3.0](https://github.com/golangci/golangci-lint-action/releases/tag/v9.3.0) |
-| `dominikh/staticcheck-action@v1.4.1` | Staticcheck workflow | [v1.4.1](https://github.com/dominikh/staticcheck-action/releases/tag/v1.4.1) |
-| Docker `setup-qemu@v4`, `metadata@v6`, `setup-buildx@v4`, `login@v4`, and `build-push@v7` | Docker Hub and GHCR workflows | [QEMU v4.4.0](https://github.com/docker/setup-qemu-action/releases/tag/v4.4.0), [metadata v6.2.0](https://github.com/docker/metadata-action/releases/tag/v6.2.0), [Buildx v4.4.1](https://github.com/docker/setup-buildx-action/releases/tag/v4.4.1), [login v4.6.0](https://github.com/docker/login-action/releases/tag/v4.6.0), [build-push v7.4.0](https://github.com/docker/build-push-action/releases/tag/v7.4.0) |
-| `bufbuild/buf-setup-action@v1` | Buf build workflow | [v1.50.0](https://github.com/bufbuild/buf-setup-action/releases/tag/v1.50.0) |
-| `softprops/action-gh-release@v3` | GitHub release workflow | [v3.0.3](https://github.com/softprops/action-gh-release/releases/tag/v3.0.3) |
-| `rtCamp/action-slack-notify@v2` | Slack notification workflow | [v2.4.0](https://github.com/rtCamp/action-slack-notify/releases/tag/v2.4.0) |
-| `actions-rust-lang/rustfmt@v1` | Rust lint workflow | [v1.1.2](https://github.com/actions-rust-lang/rustfmt/releases/tag/v1.1.2) |
-| `actions-rust-lang/setup-rust-toolchain@v1` | Rust lint workflow | [v2.0.1](https://github.com/actions-rust-lang/setup-rust-toolchain/releases/tag/v2.0.1) is latest; the workflow deliberately retains v1 |
-| `danger/danger-js@9.1.8` | Danger workflow; exact tool-version pin | [npm version](https://www.npmjs.com/package/danger/v/9.1.8) |
-| `wangchucheng/git-repo-sync@v0.1.0` | Repository sync workflow | [Latest upstream release](https://github.com/wangchucheng/git-repo-sync/releases/tag/v0.1.0) |
+| `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1` (`v7.0.1`) | Reusable workflows and Go/Python test composite actions | [Release](https://github.com/actions/checkout/releases/tag/v7.0.1) |
+| `actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e` (`v7.0.0`) | Go build, lint, and staticcheck workflows | [Release](https://github.com/actions/setup-go/releases/tag/v7.0.0) |
+| `actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1` (`v7.1.0`) | Danger, npm publish, and semantic-release workflows | [Release](https://github.com/actions/setup-node/releases/tag/v7.1.0) |
+| `actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0` (`v7.1.0`) | Poetry and uv composite setup actions | [Release](https://github.com/actions/setup-python/releases/tag/v7.1.0) |
+| `actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9` (`v6.1.0`) | Python setup, Rust, Docker, and Danger workflows | [Release](https://github.com/actions/cache/releases/tag/v6.1.0) |
+| `actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9` (`v7.0.2`) | Buf and Bun build workflows | [Release](https://github.com/actions/upload-artifact/releases/tag/v7.0.2) |
+| `codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5` (`v7.1.1`) | Go/Python coverage composite actions and Python test workflow | [Release](https://github.com/codecov/codecov-action/releases/tag/v7.1.1) |
+| `jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06` (`v1.1.1`) | Workflows and composite actions that select a setup action dynamically | [Release](https://github.com/jenseng/dynamic-uses/releases/tag/v1.1.1) |
+| `astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2` (`v10.3.3`) | uv composite setup action | [Release](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.3) |
+| `snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263` (`v1.4.2`) | Poetry composite setup action | [Release](https://github.com/snok/install-poetry/releases/tag/v1.4.2) |
+| `oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6` (`v2.2.0`) | Bun build workflow | [Release](https://github.com/oven-sh/setup-bun/releases/tag/v2.2.0) |
+| `astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89` (`v4.1.0`) | Ruff lint workflow | [Release](https://github.com/astral-sh/ruff-action/releases/tag/v4.1.0) |
+| `golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a` (`v9.3.0`) | Go lint workflow | [Release](https://github.com/golangci/golangci-lint-action/releases/tag/v9.3.0) |
+| `dominikh/staticcheck-action@9716614d4101e79b4340dd97b10e54d68234e431` (`v1.4.1`) | Staticcheck workflow | [Release](https://github.com/dominikh/staticcheck-action/releases/tag/v1.4.1) |
+| Docker QEMU `99012661954931238ded8c8b007157a8430204e1` (`v4.4.0`), metadata `dc802804100637a589fabce1cb79ff13a1411302` (`v6.2.0`), Buildx `f87e5991a6d7451dcb8d9637bfbc97413f497069` (`v4.4.1`), login `8aa5831fb8d48d8f76594c7ddde61ae58019f550` (`v4.8.0`), build-push `c3c9e263c25d99ce0380d002d59b67737d91b0dc` (`v7.4.0`) | Docker Hub and GHCR workflows | [QEMU](https://github.com/docker/setup-qemu-action/releases/tag/v4.4.0), [metadata](https://github.com/docker/metadata-action/releases/tag/v6.2.0), [Buildx](https://github.com/docker/setup-buildx-action/releases/tag/v4.4.1), [login](https://github.com/docker/login-action/releases/tag/v4.8.0), [build-push](https://github.com/docker/build-push-action/releases/tag/v7.4.0) |
+| `bufbuild/buf-setup-action@a47c93e0b1648d5651a065437926377d060baa99` (`v1.50.0`) | Buf build workflow | [Release](https://github.com/bufbuild/buf-setup-action/releases/tag/v1.50.0) |
+| `softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3` (`v3.0.4`) | GitHub release workflow | [Release](https://github.com/softprops/action-gh-release/releases/tag/v3.0.4) |
+| `rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4` (`v2.4.1`) | Slack notification workflow | [Release](https://github.com/rtCamp/action-slack-notify/releases/tag/v2.4.1) |
+| `actions-rust-lang/rustfmt@4066006ec54a31931b9b1fddfd38f2fdf2d27143` (`v1.1.2`) | Rust lint workflow | [Release](https://github.com/actions-rust-lang/rustfmt/releases/tag/v1.1.2) |
+| `actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659` (`v1.17.0`) | Rust lint workflow | [Release](https://github.com/actions-rust-lang/setup-rust-toolchain/releases/tag/v1.17.0); v2.0.1 is newer but changes warning enforcement |
+| `danger/danger-js@fbcbc6a9f652227b481b28ca226cee02a820d970` (`9.1.8`) | Danger workflow and exact tool version | [npm package](https://www.npmjs.com/package/danger/v/9.1.8) |
+| `wangchucheng/git-repo-sync@63782025e80e84c48b25a1ee6bb9a22a3bd570d3` (`v0.1.0`) | Repository sync workflow | [Latest upstream release](https://github.com/wangchucheng/git-repo-sync/releases/tag/v0.1.0) |
 
 The newer `setup-rust-toolchain` v2 release changes how compiler warnings are
 enforced (using Cargo's `build.warnings` configuration rather than the previous
-default `RUSTFLAGS`), so the workflow remains on its v1 line until that behavior
-can be evaluated separately.
+default `RUSTFLAGS`), so the workflow remains on its v1.17.0 commit until that
+behavior can be evaluated separately.
 The repo-sync action has no later upstream release; do not invent a replacement
 version without evaluating a migration. Danger remains on 9.1.8 because the
 upstream package is now 14.x and that major jump needs a separate compatibility
