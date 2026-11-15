@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       java-version:
-        description: JDK version to install
+        description: Temurin JDK major version (supported versions are 17, 21, and 25)
         default: "21"
         required: false
         type: string

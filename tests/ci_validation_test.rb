@@ -4,6 +4,7 @@ require "fileutils"
 require "tempfile"
 require "open3"
 require "tmpdir"
+require "yaml"
 
 class CIValidationTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
@@ -13,6 +14,7 @@ class CIValidationTest < Minitest::Test
   JVM_WORKFLOW_FIXTURES = %w[
     java-gradle-workflow-consumer.yml
     java-workflow-consumer.yml
+    kotlin-command-workflow-consumer.yml
     kotlin-workflow-consumer.yml
   ].map { |name| File.join(ROOT, "tests/fixtures/ci-validation", name) }.freeze
 
@@ -37,6 +39,24 @@ class CIValidationTest < Minitest::Test
       _stdout, stderr, status = run_validator(fixture)
 
       assert status.success?, "#{fixture}: #{stderr}"
+    end
+  end
+
+  def test_jvm_consumer_inputs_match_reusable_workflows
+    JVM_WORKFLOW_FIXTURES.each do |fixture|
+      consumer = YAML.safe_load(File.read(fixture), aliases: false)
+      workflow_path = consumer.fetch("jobs").values.first.fetch("uses").split("@", 2).first.split("/").last
+      workflow = YAML.safe_load(
+        File.read(File.join(ROOT, ".github/workflows", workflow_path)),
+        aliases: false
+      )
+      workflow_call = workflow["on"] || workflow[true]
+      defined_inputs = workflow_call.fetch("workflow_call").fetch("inputs")
+      caller_inputs = consumer.fetch("jobs").values.first.fetch("with", {})
+
+      caller_inputs.each_key do |name|
+        assert_includes defined_inputs, name, "#{fixture} passes undefined input #{name}"
+      end
     end
   end
 
