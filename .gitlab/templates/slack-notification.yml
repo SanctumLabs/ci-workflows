@@ -19,7 +19,7 @@
   stage: .post
   dependencies: []
   image:
-    name: cloudposse/slack-notifier
+    name: cloudposse/slack-notifier@sha256:4e3c6d73d9c4ac15ef63d812acae5f8d3f0d166a642eb44d55836769619097c1
     entrypoint: [""]
   variables:
     GIT_STRATEGY: "none"

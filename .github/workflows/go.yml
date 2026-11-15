@@ -14,7 +14,7 @@
 #    build: # Name of the job to run
 #      strategy:
 #        matrix:
-#          go-version: [ '1.25' ]
+#          go-version: [ '1.26' ]
 #      name: Build
 #      uses: SanctumLabs/ci-workflows/.github/workflows/go.yml@main
 #      with:
@@ -33,7 +33,7 @@ on:
           required: false
         go-version:
           description: Go Version to use
-          default: '1.25'
+          default: '1.26'
           type: string
           required: false
         cache:

@@ -14,7 +14,7 @@
 #      name: Lint
 #      uses: SanctumLabs/ci-workflows/.github/workflows/go-lint.yml@main
 #      with:
-#        go-version: 1.25 # Go version to use
+#        go-version: 1.26 # Go version to use
 
 name: Reuseable Go lint workflow
 
@@ -28,7 +28,7 @@ on:
           required: false
         go-version:
           description: Go Version to use
-          default: '1.25'
+          default: '1.26'
           type: string
           required: false
         cache:
@@ -47,15 +47,15 @@ jobs:
     runs-on: ${{ inputs.platform }}
     steps:
         - name: Checkout
-          uses: actions/checkout@v7
+          uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
         - name: Install Go
-          uses: actions/setup-go@v7
+          uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
           with:
             go-version: ${{ inputs.go-version }}
             cache: ${{ inputs.cache }}
 
         - name: golangci-lint
-          uses: golangci/golangci-lint-action@v9.3.0
+          uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
           with:
             working-directory: ${{ inputs.working-directory }}

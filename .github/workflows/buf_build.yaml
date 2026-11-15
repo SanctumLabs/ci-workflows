@@ -6,6 +6,12 @@ name: Buf Build
 
 on:
   workflow_call:
+    inputs:
+      artifact-name:
+        description: Name to use for the generated artifact
+        required: false
+        type: string
+        default: lib
 
 jobs:
   build:
@@ -14,18 +20,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Buf Setup
-        uses: bufbuild/buf-setup-action@v1
+        uses: bufbuild/buf-setup-action@a47c93e0b1648d5651a065437926377d060baa99 # v1.50.0
 
       - name: Generate
         run: buf generate
       
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: lib
+          name: ${{ inputs.artifact-name }}
           path: |
             lib
           retention-days: 7

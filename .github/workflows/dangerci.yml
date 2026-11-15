@@ -8,7 +8,7 @@ on:
         description: Node version to use
         required: false
         type: string
-        default: 16.x
+        default: 24.x
     secrets:
       token:
         description: Github Token to write to PRs
@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Use NodeJS ${{ inputs.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ inputs.node-version }}
 
@@ -35,7 +35,7 @@ jobs:
         id: cache-dir-path
         run: echo "dir=$(yarn cache dir)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache # use this to check for `cache-hit` (`steps.cache.outputs.cache-hit != 'true'`)
         with:
           path: |
@@ -51,7 +51,7 @@ jobs:
         run: yarn install
 
       - name: Danger CI Check
-        uses: danger/danger-js@9.1.8
+        uses: danger/danger-js@fbcbc6a9f652227b481b28ca226cee02a820d970 # 9.1.8
         env:
           CI: true
           GITHUB_TOKEN: ${{ secrets.token }}

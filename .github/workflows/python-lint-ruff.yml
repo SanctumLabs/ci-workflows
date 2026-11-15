@@ -41,7 +41,7 @@ on:
         type: string
       ruff-version:
         description: Ruff version to use
-        default: "0.16.3"
+        default: "0.17.5"
         required: false
         type: string
       directory:
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Validate Python packager
         uses: sanctumlabs/ci-workflows/.github/actions/validate-python-packager@main
@@ -84,13 +84,13 @@ jobs:
 
       # Ref: https://github.com/jenseng/dynamic-uses
       - name: Setup Python
-        uses: jenseng/dynamic-uses@v1
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1.1.1
         with:
           uses: sanctumlabs/ci-workflows/.github/actions/setup-python-${{ inputs.packager }}@main
           with: '{ "python-version": "${{ inputs.python-version }}", "install-command": "${{ inputs.install-command }}", "virtual-env-directory": "${{ inputs.virtual-env-dir }}" }'
 
       - name: Linting with Ruff
-        uses: astral-sh/ruff-action@v4.1.0
+        uses: astral-sh/ruff-action@278981a28ce3188b1e39527901f38254bf3aac89 # v4.1.0
         with:
           version: ${{ inputs.ruff-version }}
           src: ${{ inputs.directory }}

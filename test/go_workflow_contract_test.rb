@@ -36,6 +36,7 @@ class GoWorkflowContractTest < Minitest::Test
     allowed_metadata = %w[description default required deprecationMessage]
 
     assert_includes action.fetch('inputs').keys, 'codacy_token'
+    assert_includes action.fetch('inputs').keys, 'codecov_token'
 
     action.fetch('inputs').each do |input_name, metadata|
       unsupported = metadata.keys - allowed_metadata
@@ -82,8 +83,8 @@ class GoWorkflowContractTest < Minitest::Test
       }
 
       passed_inputs.each do |input_name, value|
-        expected_value = if input_name == 'codacy_token'
-                           '${{ secrets.codacy_token }}'
+        expected_value = if %w[codacy_token codecov_token].include?(input_name)
+                           "${{ secrets.#{input_name} }}"
                          else
                            "${{ inputs.#{input_name} }}"
                          end

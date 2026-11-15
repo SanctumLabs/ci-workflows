@@ -11,6 +11,17 @@ class CIValidationTest < Minitest::Test
   VALIDATOR = File.join(ROOT, "scripts/validate-ci-templates.rb")
   FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/gitlab-template.yml")
   WORKFLOW_FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/go-workflow-consumer.yml")
+  BUF_WORKFLOW = File.join(ROOT, ".github/workflows/buf_build.yaml")
+  DOCKER_HUB_TEMPLATE = File.join(ROOT, ".gitlab/templates/docker-hub-build.yml")
+  HADOLINT_TEMPLATE = File.join(ROOT, ".gitlab/templates/hadolint.yml")
+  CODECOV_ACTIONS = %w[
+    .github/actions/go/action.yml
+    .github/actions/python-test/action.yml
+  ].map { |path| File.join(ROOT, path) }.freeze
+  CODECOV_WORKFLOWS = %w[
+    .github/workflows/python-test.yml
+    .github/workflows/go-test.yml
+  ].map { |path| File.join(ROOT, path) }.freeze
   JVM_WORKFLOW_FIXTURES = %w[
     java-gradle-workflow-consumer.yml
     java-workflow-consumer.yml
@@ -32,6 +43,57 @@ class CIValidationTest < Minitest::Test
     _stdout, stderr, status = run_validator(WORKFLOW_FIXTURE)
 
     assert status.success?, stderr
+  end
+
+  def test_buf_workflow_allows_distinct_artifact_names
+    workflow = YAML.safe_load(File.read(BUF_WORKFLOW), aliases: false)
+    workflow_call = workflow["on"] || workflow[true]
+    input = workflow_call.fetch("workflow_call").fetch("inputs").fetch("artifact-name")
+    upload_step = workflow.fetch("jobs").fetch("build").fetch("steps").find do |step|
+      step["uses"].to_s.include?("actions/upload-artifact@")
+    end
+
+    assert_equal "string", input.fetch("type")
+    assert_equal "lib", input.fetch("default")
+    assert_equal "${{ inputs.artifact-name }}", upload_step.fetch("with").fetch("name")
+  end
+
+  def test_gitlab_images_provide_shells_required_by_their_jobs
+    docker_template = YAML.safe_load(File.read(DOCKER_HUB_TEMPLATE), aliases: false)
+    docker_job = docker_template.fetch(".docker-hub-build")
+
+    assert_includes docker_job.fetch("before_script"), "apk add --no-cache bash"
+    assert_includes docker_job.fetch("script").first, "docker-build.sh"
+    assert_equal "hadolint/hadolint:v2.15.1-debian",
+                 YAML.safe_load(File.read(HADOLINT_TEMPLATE), aliases: false)
+                   .fetch("hadolint").fetch("image")
+  end
+
+  def test_codecov_uploads_use_explicit_authentication_and_fail_closed
+    CODECOV_ACTIONS.each do |path|
+      action = YAML.safe_load(File.read(path), aliases: false)
+      assert_includes action.fetch("inputs"), "codecov_token"
+      upload = action.fetch("runs").fetch("steps").find do |step|
+        step["uses"].to_s.include?("codecov/codecov-action@")
+      end
+
+      assert_equal "${{ inputs.codecov_token }}", upload.fetch("with").fetch("token")
+      assert_equal true, upload.fetch("with").fetch("fail_ci_if_error")
+    end
+
+    CODECOV_WORKFLOWS.each do |path|
+      workflow = YAML.safe_load(File.read(path), aliases: false)
+      workflow_call = workflow["on"] || workflow[true]
+      assert_includes workflow_call.fetch("workflow_call").fetch("secrets"), "codecov_token"
+
+      upload = workflow.fetch("jobs").values.flat_map { |job| job.fetch("steps", []) }.find do |step|
+        step["uses"].to_s.include?("codecov/codecov-action@")
+      end
+      next unless upload
+
+      assert_equal "${{ secrets.codecov_token }}", upload.fetch("with").fetch("token")
+      assert_equal true, upload.fetch("with").fetch("fail_ci_if_error")
+    end
   end
 
   def test_accepts_representative_jvm_workflow_consumers
