@@ -12,6 +12,9 @@ on:
       - '.github/workflows/go*.yml'
       - 'test/go_workflow_contract_test.rb'
 
+permissions:
+  contents: read
+
 jobs:
   contract:
     runs-on: ubuntu-latest
