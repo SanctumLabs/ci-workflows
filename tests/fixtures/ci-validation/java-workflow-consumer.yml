@@ -1,0 +1,15 @@
+name: Reusable Java CI consumer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: SanctumLabs/ci-workflows/.github/workflows/java-ci.yml@main
+    with:
+      java-version: "21"
+      build-tool: maven
+      task: verify

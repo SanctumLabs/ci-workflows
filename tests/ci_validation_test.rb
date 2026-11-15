@@ -10,6 +10,11 @@ class CIValidationTest < Minitest::Test
   VALIDATOR = File.join(ROOT, "scripts/validate-ci-templates.rb")
   FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/gitlab-template.yml")
   WORKFLOW_FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/go-workflow-consumer.yml")
+  JVM_WORKFLOW_FIXTURES = %w[
+    java-gradle-workflow-consumer.yml
+    java-workflow-consumer.yml
+    kotlin-workflow-consumer.yml
+  ].map { |name| File.join(ROOT, "tests/fixtures/ci-validation", name) }.freeze
 
   def run_validator(path)
     Open3.capture3(RbConfig.ruby, VALIDATOR, path)
@@ -25,6 +30,14 @@ class CIValidationTest < Minitest::Test
     _stdout, stderr, status = run_validator(WORKFLOW_FIXTURE)
 
     assert status.success?, stderr
+  end
+
+  def test_accepts_representative_jvm_workflow_consumers
+    JVM_WORKFLOW_FIXTURES.each do |fixture|
+      _stdout, stderr, status = run_validator(fixture)
+
+      assert status.success?, "#{fixture}: #{stderr}"
+    end
   end
 
   def test_rejects_invalid_yaml

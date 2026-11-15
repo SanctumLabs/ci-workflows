@@ -1,0 +1,75 @@
+name: Reusable Java CI
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: JDK version to install
+        default: "21"
+        required: false
+        type: string
+      build-tool:
+        description: Build tool to use (gradle or maven)
+        default: gradle
+        required: false
+        type: string
+      task:
+        description: Gradle task or Maven lifecycle phase or goal when command is empty
+        default: test
+        required: false
+        type: string
+      command:
+        description: Optional shell command that replaces the standard task
+        default: ""
+        required: false
+        type: string
+      cache:
+        description: Whether to cache build dependencies
+        default: true
+        required: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate build tool
+        shell: bash
+        env:
+          BUILD_TOOL: ${{ inputs.build-tool }}
+        run: |
+          case "$BUILD_TOOL" in
+            gradle|maven) ;;
+            *)
+              echo "Unsupported Java build tool: $BUILD_TOOL (expected gradle or maven)." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Set up JDK and dependency cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: ${{ inputs.cache && inputs.build-tool || '' }}
+
+      - name: Run Java build
+        shell: bash
+        env:
+          BUILD_TOOL: ${{ inputs.build-tool }}
+          TASK: ${{ inputs.task }}
+          COMMAND: ${{ inputs.command }}
+        run: |
+          if [[ -n "$COMMAND" ]]; then
+            bash -euo pipefail -c "$COMMAND"
+          elif [[ "$BUILD_TOOL" == "gradle" ]]; then
+            ./gradlew "$TASK"
+          else
+            ./mvnw "$TASK"
+          fi
