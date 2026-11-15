@@ -1,0 +1,14 @@
+name: Reusable Kotlin command consumer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: SanctumLabs/ci-workflows/.github/workflows/kotlin-ci.yml@main
+    with:
+      java-version: "21"
+      command: ./gradlew clean test

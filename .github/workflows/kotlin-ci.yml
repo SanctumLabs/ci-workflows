@@ -1,0 +1,67 @@
+name: Reusable Kotlin CI
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: Temurin JDK major version (supported versions are 17, 21, and 25)
+        default: "21"
+        required: false
+        type: string
+      task:
+        description: Gradle task to run when command is empty
+        default: test
+        required: false
+        type: string
+      command:
+        description: Optional shell command that replaces the standard task
+        default: ""
+        required: false
+        type: string
+      cache:
+        description: Whether to cache Gradle dependencies
+        default: true
+        required: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate JDK version
+        shell: bash
+        env:
+          JAVA_VERSION: ${{ inputs.java-version }}
+        run: |
+          case "$JAVA_VERSION" in
+            17|21|25) ;;
+            *)
+              echo "Unsupported Temurin JDK major version: $JAVA_VERSION (expected 17, 21, or 25)." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Set up JDK and Gradle dependency cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: ${{ inputs.cache && 'gradle' || '' }}
+
+      - name: Run Kotlin build
+        shell: bash
+        env:
+          TASK: ${{ inputs.task }}
+          COMMAND: ${{ inputs.command }}
+        run: |
+          if [[ -n "$COMMAND" ]]; then
+            bash -euo pipefail -c "$COMMAND"
+          else
+            ./gradlew "$TASK"
+          fi

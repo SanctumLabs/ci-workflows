@@ -4,12 +4,19 @@ require "fileutils"
 require "tempfile"
 require "open3"
 require "tmpdir"
+require "yaml"
 
 class CIValidationTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
   VALIDATOR = File.join(ROOT, "scripts/validate-ci-templates.rb")
   FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/gitlab-template.yml")
   WORKFLOW_FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/go-workflow-consumer.yml")
+  JVM_WORKFLOW_FIXTURES = %w[
+    java-gradle-workflow-consumer.yml
+    java-workflow-consumer.yml
+    kotlin-command-workflow-consumer.yml
+    kotlin-workflow-consumer.yml
+  ].map { |name| File.join(ROOT, "tests/fixtures/ci-validation", name) }.freeze
 
   def run_validator(path)
     Open3.capture3(RbConfig.ruby, VALIDATOR, path)
@@ -25,6 +32,49 @@ class CIValidationTest < Minitest::Test
     _stdout, stderr, status = run_validator(WORKFLOW_FIXTURE)
 
     assert status.success?, stderr
+  end
+
+  def test_accepts_representative_jvm_workflow_consumers
+    JVM_WORKFLOW_FIXTURES.each do |fixture|
+      _stdout, stderr, status = run_validator(fixture)
+
+      assert status.success?, "#{fixture}: #{stderr}"
+    end
+  end
+
+  def test_jvm_consumer_inputs_match_reusable_workflows
+    JVM_WORKFLOW_FIXTURES.each do |fixture|
+      consumer = YAML.safe_load(File.read(fixture), aliases: false)
+      workflow_path = consumer.fetch("jobs").values.first.fetch("uses").split("@", 2).first.split("/").last
+      workflow = YAML.safe_load(
+        File.read(File.join(ROOT, ".github/workflows", workflow_path)),
+        aliases: false
+      )
+      workflow_call = workflow["on"] || workflow[true]
+      defined_inputs = workflow_call.fetch("workflow_call").fetch("inputs")
+      caller_inputs = consumer.fetch("jobs").values.first.fetch("with", {})
+
+      caller_inputs.each do |name, value|
+        assert_includes defined_inputs, name, "#{fixture} passes undefined input #{name}"
+
+        input_type = defined_inputs.fetch(name).fetch("type")
+        case input_type
+        when "string"
+          assert_kind_of String, value, "#{fixture} passes a non-string value for #{name}"
+        when "boolean"
+          assert_includes [true, false], value, "#{fixture} passes a non-boolean value for #{name}"
+        when "number"
+          assert_kind_of Numeric, value, "#{fixture} passes a non-numeric value for #{name}"
+        end
+
+        case name
+        when "java-version"
+          assert_includes %w[17 21 25], value, "#{fixture} uses an unsupported JDK version"
+        when "build-tool"
+          assert_includes %w[gradle maven], value, "#{fixture} uses an unsupported Java build tool"
+        end
+      end
+    end
   end
 
   def test_rejects_invalid_yaml
