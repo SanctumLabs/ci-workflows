@@ -1,0 +1,23 @@
+include:
+  - project: sanctumlabs/tools/gitlab-ci
+    ref: v1.4.1
+    file: /.gitlab/templates/docker-hub-build.yml
+
+stages:
+  - build
+  - publish
+
+build-image:
+  stage: build
+  extends: .docker-hub-build
+  before_script:
+    - apk add --no-cache bash curl
+    - mkdir -p "$CI_PROJECT_DIR/.ci-workflows"
+    - curl -fsSL "https://raw.githubusercontent.com/SanctumLabs/ci-workflows/v1.4.1/scripts/docker-build.sh" -o "$CI_PROJECT_DIR/.ci-workflows/docker-build.sh"
+  script:
+    - bash "$CI_PROJECT_DIR/.ci-workflows/docker-build.sh"
+  variables:
+    DOCKERHUB_REPO: example-org
+    DOCKER_IMAGE_NAME: example-service
+    DOCKERHUB_USERNAME: $DOCKERHUB_USERNAME
+    DOCKERHUB_PASSWORD: $DOCKERHUB_PASSWORD

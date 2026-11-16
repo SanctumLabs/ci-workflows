@@ -1,0 +1,15 @@
+name: Reusable Bun build consumer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: SanctumLabs/ci-workflows/.github/workflows/js-bun-setup.yml@v1.4.1
+    with:
+      working-directory: .
+      command: bun run build
+      build-dir: dist
