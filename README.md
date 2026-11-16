@@ -1,35 +1,18 @@
 # CI Workflows
 
-CI Workflows scripts & resources. We store templates for gitlab CI, Github Actions here and include them where they are needed.
+Reusable CI workflows, composite GitHub Actions, and GitLab CI templates for
+common build, test, lint, publish, and release tasks.
 
-## Templates
+## Get started
 
-These templates can be included in other pipelines.They are "functions" for things we do often.
+- [Usage guide](docs/USAGE.md): supported entry points, inputs, secrets,
+  permissions, configuration support, and copyable consumer examples.
+- [Dependency versions](DEPENDENCY_VERSIONS.md): runtime defaults, third-party
+  action pins, and version update policy.
+- [Contributing](CONTRIBUTING.md): conventions and validation commands.
 
-To use them first include the template
-
-For current third-party action, tool, and container image versions and the
-version update policy, see [DEPENDENCY_VERSIONS.md](DEPENDENCY_VERSIONS.md).
-
-``` yaml
-include:
-  - project: 'sanctumlabs/tools/gitlab-ci'
-    file: '/templates/docker-ecr-build.yml'
-```
-
-Next we need to extend them in a job, by overriding the variables with what we want them to be
-
-```yaml
-build-dev:
-  stage: build
-  needs: []
-  extends: .docker-ecr-build
-  variables:
-    AWS_DEFAULT_REGION: "$DEV_AWS_REGION"
-    AWS_ACCESS_KEY_ID: "$DEV_AWS_ACCESS_KEY_ID"
-    AWS_SECRET_ACCESS_KEY: "$DEV_AWS_SECRET_ACCESS_KEY"
-    ECR_IMAGE_REPO: "$DEV_REGISTRY_IMAGE"
-    ECR_IMAGE_TAG: "$CI_COMMIT_SHA"
-  except:
-    - master
-```
+GitHub consumers call reusable workflows as jobs and pass credentials through
+`secrets`; GitLab consumers include a template and extend its hidden job where
+applicable. Pin consumer references to a published release tag or full commit
+SHA rather than a moving `@main` ref. The usage guide documents the current
+entry points and tested examples for both CI systems.

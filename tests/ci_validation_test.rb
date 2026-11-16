@@ -9,6 +9,7 @@ require "yaml"
 class CIValidationTest < Minitest::Test
   ROOT = File.expand_path("..", __dir__)
   VALIDATOR = File.join(ROOT, "scripts/validate-ci-templates.rb")
+  USAGE_GUIDE = File.join(ROOT, "docs/USAGE.md")
   FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/gitlab-template.yml")
   WORKFLOW_FIXTURE = File.join(ROOT, "tests/fixtures/ci-validation/go-workflow-consumer.yml")
   BUF_WORKFLOW = File.join(ROOT, ".github/workflows/buf_build.yaml")
@@ -137,6 +138,127 @@ class CIValidationTest < Minitest::Test
         end
       end
     end
+  end
+
+  def test_usage_guide_documents_every_reusable_workflow_contract
+    guide = File.read(USAGE_GUIDE)
+    workflow_paths = Dir.glob(File.join(ROOT, ".github/workflows/*.{yml,yaml}")).sort
+
+    workflow_paths.each do |path|
+      workflow = YAML.safe_load(File.read(path), aliases: false)
+      workflow_call = workflow["on"] || workflow[true]
+      next unless workflow_call&.key?("workflow_call")
+
+      relative_path = path.delete_prefix("#{ROOT}/")
+      row = guide.lines.find { |line| line.start_with?("| `#{relative_path}` |") }
+      refute_nil row, "usage guide is missing #{relative_path}"
+
+      call = workflow_call.fetch("workflow_call")
+      call.fetch("inputs", {}).each do |name, input|
+        status = input["required"] ? "required" : "optional"
+        assert_includes row, "`#{name}` (#{input.fetch("type")}; #{status}",
+                        "#{relative_path} type or required status is missing for #{name}"
+        if input.key?("default")
+          assert_includes row, "default:", "#{relative_path} default is missing for #{name}"
+          assert_includes row, input["default"].to_s,
+                          "#{relative_path} default value is missing for #{name}"
+        end
+      end
+
+      secrets = call["secrets"]
+      if secrets.is_a?(Hash)
+        secrets.each do |name, secret|
+          status = secret["required"] ? "required" : "optional"
+          assert_includes row, "`#{name}` (#{status})",
+                          "#{relative_path} secret or required status is missing"
+        end
+      else
+        assert_includes row, "none", "#{relative_path} should document that it takes no secrets"
+      end
+
+      permissions = workflow.fetch("permissions", {})
+      unless permissions.empty?
+        permissions.each do |name, value|
+          assert_includes row, "#{name}: #{value}", "#{relative_path} permissions are missing"
+        end
+      end
+      workflow.fetch("jobs", {}).each do |job_name, job|
+        next unless job["permissions"]
+
+        if job["permissions"].is_a?(Hash)
+          job["permissions"].each do |name, value|
+            assert_includes row, "#{name}: #{value}",
+                            "#{relative_path} job permission #{job_name}.#{name} is missing"
+          end
+        else
+          assert_includes row, "#{job_name}: #{job["permissions"]}",
+                          "#{relative_path} job permissions are missing"
+        end
+      end
+      if permissions.empty? && workflow.fetch("jobs", {}).values.none? { |job| job["permissions"] }
+        assert_includes row, "not declared (caller defaults apply)",
+                        "#{relative_path} should explain that permissions are not declared"
+      end
+    end
+  end
+
+  def test_usage_guide_documents_every_composite_action_contract
+    guide = File.read(USAGE_GUIDE)
+
+    Dir.glob(File.join(ROOT, ".github/actions/*/action.yml")).sort.each do |path|
+      action = YAML.safe_load(File.read(path), aliases: false)
+      relative_path = path.delete_prefix("#{ROOT}/")
+      row = guide.lines.find { |line| line.start_with?("| `#{relative_path}` |") }
+      refute_nil row, "usage guide is missing #{relative_path}"
+
+      action.fetch("inputs", {}).each do |name, input|
+        status = input["required"] ? "required" : "optional"
+        assert_includes row, "`#{name}` (#{status}",
+                        "#{relative_path} required status is missing for #{name}"
+        if input.key?("default")
+          assert_includes row, "default:", "#{relative_path} default is missing for #{name}"
+          assert_includes row, input["default"].to_s,
+                          "#{relative_path} default value is missing for #{name}"
+        end
+      end
+    end
+  end
+
+  def test_usage_guide_lists_all_gitlab_templates_and_checked_examples
+    guide = File.read(USAGE_GUIDE)
+
+    Dir.glob(File.join(ROOT, ".gitlab/templates/*.{yml,yaml}")).each do |path|
+      relative_path = path.delete_prefix("#{ROOT}/")
+      assert_includes guide, "`#{relative_path}`", "usage guide is missing #{relative_path}"
+    end
+
+    Dir.glob(File.join(ROOT, "tests/fixtures/ci-validation/docs-*-workflow-consumer.yml")).each do |path|
+      relative_path = path.delete_prefix("#{ROOT}/")
+      assert_includes guide, relative_path, "usage guide is missing example link #{relative_path}"
+    end
+
+    assert_includes guide, "repository automation or internal wiring"
+    assert_includes guide, "does not declare any as deprecated"
+
+    Dir.glob(File.join(ROOT, ".github/workflows/*.{yml,yaml}")).sort.each do |path|
+      workflow = YAML.safe_load(File.read(path), aliases: false)
+      workflow_call = workflow["on"] || workflow[true] || {}
+      next if workflow_call.key?("workflow_call")
+
+      relative_path = path.delete_prefix("#{ROOT}/")
+      assert_includes guide, "`#{relative_path}`",
+                      "usage guide does not classify repo-only workflow #{relative_path}"
+    end
+
+    gitlab_example = YAML.safe_load(
+      File.read(File.join(ROOT, "tests/fixtures/ci-validation/docs-gitlab-consumer.yml")),
+      aliases: false
+    )
+    assert_includes guide, "../tests/fixtures/ci-validation/docs-gitlab-consumer.yml"
+    include = gitlab_example.fetch("include").first
+    assert_equal "/.gitlab/templates/docker-hub-build.yml", include.fetch("file")
+    assert_equal ".docker-hub-build", gitlab_example.fetch("build-image").fetch("extends")
+    assert_includes gitlab_example.fetch("build-image").fetch("variables"), "DOCKERHUB_PASSWORD"
   end
 
   def test_rejects_invalid_yaml

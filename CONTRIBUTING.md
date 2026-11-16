@@ -8,6 +8,7 @@
 - Give optional runtime and runner inputs a conservative, explicit default; prefer a stable supported runtime version over `latest`. Do not change existing third-party action or runtime versions as part of unrelated changes.
 - Use `./.github/actions/<name>` for local actions and repository-relative paths for scripts. Reference reusable workflows as `SanctumLabs/ci-workflows/.github/workflows/<file>@<ref>` and shared actions as `SanctumLabs/ci-workflows/.github/actions/<name>@<ref>`.
 - For GitLab templates, document required and optional variables near the template, use hidden job names for reusable jobs, and keep executable shell in checked scripts or script blocks.
+- Keep [the usage guide](docs/USAGE.md) aligned with every consumer-facing entry point. Add a validated consumer fixture for GitHub examples and update the contract test when adding workflows, actions, or GitLab templates.
 
 The credential-free repository check validates GitHub workflow syntax, parses GitHub action metadata and GitLab templates, and checks GitLab shell syntax. Run it locally with:
 

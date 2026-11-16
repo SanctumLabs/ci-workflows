@@ -1,0 +1,14 @@
+name: Reusable Rust test consumer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: SanctumLabs/ci-workflows/.github/workflows/rust-test.yml@v1.4.1
+    with:
+      rust-version: stable
+      working-directory: .

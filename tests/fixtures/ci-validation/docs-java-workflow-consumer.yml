@@ -1,0 +1,15 @@
+name: Reusable Java test consumer
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: SanctumLabs/ci-workflows/.github/workflows/java-ci.yml@v1.4.1
+    with:
+      java-version: "21"
+      build-tool: gradle
+      task: test
