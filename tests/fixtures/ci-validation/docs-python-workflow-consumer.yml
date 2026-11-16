@@ -11,7 +11,7 @@ jobs:
     uses: SanctumLabs/ci-workflows/.github/workflows/python-test.yml@v1.4.1
     with:
       packager: uv
-      command: pytest
+      command: .venv/bin/python -m pytest
       upload-coverage: true
     secrets:
       codecov_token: ${{ secrets.CODECOV_TOKEN }}

@@ -156,12 +156,11 @@ class CIValidationTest < Minitest::Test
       call = workflow_call.fetch("workflow_call")
       call.fetch("inputs", {}).each do |name, input|
         status = input["required"] ? "required" : "optional"
-        assert_includes row, "`#{name}` (#{input.fetch("type")}; #{status}",
+        entry = documented_input(row, name, relative_path)
+        assert_includes entry, "(#{input.fetch("type")}; #{status}",
                         "#{relative_path} type or required status is missing for #{name}"
         if input.key?("default")
-          assert_includes row, "default:", "#{relative_path} default is missing for #{name}"
-          assert_includes row, input["default"].to_s,
-                          "#{relative_path} default value is missing for #{name}"
+          assert_documented_default(entry, input["default"], relative_path, name)
         end
       end
 
@@ -202,6 +201,21 @@ class CIValidationTest < Minitest::Test
     end
   end
 
+  def test_rust_workflows_use_the_documented_toolchain_input
+    %w[rust-build.yml rust-lint.yml rust-test.yml].each do |filename|
+      path = File.join(ROOT, ".github/workflows", filename)
+      workflow = YAML.safe_load(File.read(path), aliases: false)
+      workflow_call = workflow["on"] || workflow[true]
+      assert_equal "${{ inputs.rust-version }}",
+                   workflow.fetch("jobs").values.flat_map { |job| job.fetch("steps") }
+                          .find { |step| step["uses"].to_s.include?("setup-rust-toolchain") }
+                          .fetch("with").fetch("toolchain"),
+                   "#{filename} must pass rust-version to setup-rust-toolchain"
+      assert_equal "stable", workflow_call.fetch("workflow_call").fetch("inputs")
+                                             .fetch("rust-version").fetch("default")
+    end
+  end
+
   def test_usage_guide_documents_every_composite_action_contract
     guide = File.read(USAGE_GUIDE)
 
@@ -213,12 +227,11 @@ class CIValidationTest < Minitest::Test
 
       action.fetch("inputs", {}).each do |name, input|
         status = input["required"] ? "required" : "optional"
-        assert_includes row, "`#{name}` (#{status}",
+        entry = documented_input(row, name, relative_path)
+        assert_includes entry, "(#{status}",
                         "#{relative_path} required status is missing for #{name}"
         if input.key?("default")
-          assert_includes row, "default:", "#{relative_path} default is missing for #{name}"
-          assert_includes row, input["default"].to_s,
-                          "#{relative_path} default value is missing for #{name}"
+          assert_documented_default(entry, input["default"], relative_path, name)
         end
       end
     end
@@ -259,6 +272,12 @@ class CIValidationTest < Minitest::Test
     assert_equal "/.gitlab/templates/docker-hub-build.yml", include.fetch("file")
     assert_equal ".docker-hub-build", gitlab_example.fetch("build-image").fetch("extends")
     assert_includes gitlab_example.fetch("build-image").fetch("variables"), "DOCKERHUB_PASSWORD"
+    assert_equal "v1.4.1", include.fetch("ref")
+    assert_equal ["build", "publish"], gitlab_example.fetch("stages")
+    assert_includes gitlab_example.fetch("build-image").fetch("before_script").join("\n"),
+                    "ci-workflows/v1.4.1/scripts/docker-build.sh"
+    assert_includes gitlab_example.fetch("build-image").fetch("script").join("\n"),
+                    "$CI_PROJECT_DIR/.ci-workflows/docker-build.sh"
   end
 
   def test_rejects_invalid_yaml
@@ -294,6 +313,20 @@ class CIValidationTest < Minitest::Test
   end
 
   private
+
+  def documented_input(row, name, path)
+    inputs = row.split("|")[2].to_s.split("<br>").map(&:strip)
+    entry = inputs.find { |candidate| candidate.start_with?("`#{name}` (") }
+    refute_nil entry, "#{path} input #{name} is missing from the guide"
+    entry
+  end
+
+  def assert_documented_default(entry, expected, path, name)
+    raw_default = entry[/; default: (.*)\)\z/, 1]
+    refute_nil raw_default, "#{path} default is missing for #{name}"
+    assert_equal expected, YAML.safe_load(raw_default, aliases: false),
+                 "#{path} default is incorrect for #{name}"
+  end
 
   def with_fixture(contents)
     Tempfile.create(["ci-validation", ".yml"]) do |file|

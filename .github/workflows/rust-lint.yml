@@ -52,6 +52,7 @@ jobs:
     - name: Lint
       uses: actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659 # v1.17.0
       with:
+        toolchain: ${{ inputs.rust-version }}
         components: rustfmt
 
     - name: Rustfmt Check

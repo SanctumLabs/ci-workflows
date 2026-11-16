@@ -11,3 +11,4 @@ jobs:
     uses: SanctumLabs/ci-workflows/.github/workflows/go-test.yml@v1.4.1
     with:
       command: go test ./...
+      database-name: ""

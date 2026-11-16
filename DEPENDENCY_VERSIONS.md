@@ -58,7 +58,7 @@ inventory, and retain the release comment.
 | `softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3` (`v3.0.4`) | GitHub release workflow | [Release](https://github.com/softprops/action-gh-release/releases/tag/v3.0.4) |
 | `rtCamp/action-slack-notify@06cc13f74fa8d4d2296c09455d91e9453e4025f4` (`v2.4.1`) | Slack notification workflow | [Release](https://github.com/rtCamp/action-slack-notify/releases/tag/v2.4.1) |
 | `actions-rust-lang/rustfmt@4066006ec54a31931b9b1fddfd38f2fdf2d27143` (`v1.1.2`) | Rust lint workflow | [Release](https://github.com/actions-rust-lang/rustfmt/releases/tag/v1.1.2) |
-| `actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659` (`v1.17.0`) | Rust lint workflow | [Release](https://github.com/actions-rust-lang/setup-rust-toolchain/releases/tag/v1.17.0); v2.0.1 is newer but changes warning enforcement |
+| `actions-rust-lang/setup-rust-toolchain@166cdcfd11aee3cb47222f9ddb555ce30ddb9659` (`v1.17.0`) | Rust build, lint, and test workflows | [Release](https://github.com/actions-rust-lang/setup-rust-toolchain/releases/tag/v1.17.0); v2.0.1 is newer but changes warning enforcement |
 | `danger/danger-js@fbcbc6a9f652227b481b28ca226cee02a820d970` (`9.1.8`) | Danger workflow and exact tool version | [npm package](https://www.npmjs.com/package/danger/v/9.1.8) |
 | `wangchucheng/git-repo-sync@63782025e80e84c48b25a1ee6bb9a22a3bd570d3` (`v0.1.0`) | Repository sync workflow | [Latest upstream release](https://github.com/wangchucheng/git-repo-sync/releases/tag/v0.1.0) |
 
